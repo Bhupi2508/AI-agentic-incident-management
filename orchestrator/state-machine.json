@@ -1,0 +1,36 @@
+{
+  "Comment": "State Machine for Incident Lifecycle",
+  "StartAt": "Diagnosis",
+  "States": {
+    "Diagnosis": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:diagnosis",
+      "Next": "Escalation"
+    },
+    "Escalation": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:escalation",
+      "Next": "Resolution"
+    },
+    "Resolution": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:resolution",
+      "Next": "Communication"
+    },
+    "Communication": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:communication",
+      "Next": "Closure"
+    },
+    "Closure": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:closure",
+      "Next": "PostReview"
+    },
+    "PostReview": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:postReview",
+      "End": true
+    }
+  }
+}
