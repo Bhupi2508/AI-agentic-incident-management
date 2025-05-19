@@ -1,9 +1,11 @@
 import boto3
 from botocore.exceptions import ClientError
+from dotenv import load_dotenv
+import os
 
 load_dotenv()
 
-AWS_DEFAULT_REGION = os.environ["AWS_DEFAULT_REGION"]
+AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION")
 
 ses_client = boto3.client('ses', region_name=AWS_DEFAULT_REGION)
 
