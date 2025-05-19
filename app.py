@@ -81,7 +81,7 @@ def run_agents():
 
     try:
         log("\n################  Fetching Items from DynamoDB  ################")
-        items = fetch_dynamodb_items("aiIncidentManagement")
+        items = fetch_dynamodb_items(TABLE_NAME)
         print("DynamoDB Items:", items)
     except Exception as e:
         print("Error while fetching data from DB <<<< ", e)
