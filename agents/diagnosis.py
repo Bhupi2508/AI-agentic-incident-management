@@ -1,28 +1,52 @@
-# agents/diagnosis.py
-import boto3, json
+import boto3
+import json
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-def diagnose_with_bedrock(incident_description):
-    bedrock = boto3.client("bedrock-runtime", region_name="us-east-1")
+AWS_DEFAULT_REGION = os.environ["AWS_DEFAULT_REGION"]
+MODEL_ID = os.environ["BEDROCK_MODEL_ID"]
 
-    prompt = f"Incident: {incident_description}\nGive root cause and suggest next steps."
+def diagnose_with_bedrock(incident_description):
+    bedrock = boto3.client("bedrock-runtime", region_name=AWS_DEFAULT_REGION)
+
+    prompt_text = f"""Incident: {incident_description}
+
+Give the root cause and suggest next steps.
+
+Also, provide a severity level in one word at the end. (Options: Low, Medium, High)
+
+Format the response exactly as:
+
+Root Cause: <your analysis>
+Next Steps: <your suggestions>
+Severity: <Low/Medium/High>
+"""
 
     body = {
-        "prompt": prompt,
-        "max_tokens_to_sample": 300,
+        "anthropic_version": "bedrock-2023-05-31",
+        "max_tokens": 1000,
         "temperature": 0.7,
-        "stop_sequences": ["\n"]
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": prompt_text
+                    }
+                ]
+            }
+        ]
     }
 
     response = bedrock.invoke_model(
-        modelId="anthropic.claude-3-haiku-20240307",
+        modelId=MODEL_ID,
         contentType="application/json",
         accept="application/json",
         body=json.dumps(body)
     )
 
     response_body = json.loads(response['body'].read().decode('utf-8'))
-    return response_body.get("completion", "No result")
+    return response_body['content'][0]['text']

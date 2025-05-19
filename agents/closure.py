@@ -1,9 +1,10 @@
-# agents/closure.py
+def validate_closure(feedback: str, system_logs: str) -> str:
+    feedback = feedback.lower().strip()
+    system_logs = system_logs.lower().strip()
 
-def validate_closure(feedback, system_logs):
-    if "issue fixed" in feedback.lower() or "working fine" in feedback.lower():
+    if any(phrase in feedback for phrase in ["issue fixed", "working fine", "resolved", "service is fine now"]):
         return "✅ Issue validated via feedback."
-    elif "no errors" in system_logs.lower():
+    elif any(phrase in system_logs for phrase in ["no errors", "logs clean", "running smoothly"]):
         return "✅ Issue validated via system logs."
     else:
         return "❌ Unable to confirm resolution. Needs re-check."
