@@ -1,7 +1,7 @@
 from agents.diagnosis import diagnose_with_bedrock
 from agents.escalation import escalate
 from agents.resolution import resolve_issue
-from agents.communication import send_update
+from agents.communication import send_test_email
 from agents.closure import validate_closure           # <-- import closure
 from agents.postmortem import generate_postmortem    # <-- import post-mortem
 from utils.logger import log
