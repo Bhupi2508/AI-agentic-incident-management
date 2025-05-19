@@ -9,9 +9,9 @@ AWS_DEFAULT_REGION = os.environ["AWS_DEFAULT_REGION"]
 MODEL_ID = os.environ["BEDROCK_MODEL_ID"]
 
 def calculate_confidence(output_text):
-    high_keywords = ["definitely", "confirmed", "clearly", "root cause is"]
-    medium_keywords = ["likely", "possibly", "might be", "appears to be"]
-    low_keywords = ["may be", "unsure", "unclear", "unknown", "cannot determine"]
+    high_keywords = ["definitely", "clearly", "confirmed", "root cause is", "100%", ]
+    medium_keywords = ["likely", "possibly", "might be", "appears to be", "could be"]
+    low_keywords = ["may be", "unsure", "unclear", "unknown", "not sure", "cannot determine", "no idea"]
 
     text = output_text.lower()
 
