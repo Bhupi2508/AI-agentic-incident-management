@@ -41,7 +41,7 @@ except Exception as e:
 
 try:
     log("\n################  Running Communication Agent  ################")
-    send_update(incident, resolution, EMAIL_RECIPIENT)
+    send_test_email(incident, resolution, EMAIL_RECIPIENT)
 except Exception as e:
     print(">>>> Communication Error  <<<< ", e)
 

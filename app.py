@@ -46,7 +46,7 @@ def run_agents():
 
     try:
         log("\n################  Running Communication Agent  ################")
-        send_update(incident, results.get('resolution', ''), EMAIL_RECIPIENT)
+        send_test_email(incident, results.get('resolution', ''), EMAIL_RECIPIENT)
         results['communication'] = "Email sent successfully."
     except Exception as e:
         results['communication'] = f"Communication Error: {str(e)}"
