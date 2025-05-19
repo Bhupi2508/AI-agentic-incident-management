@@ -8,6 +8,38 @@ load_dotenv()
 AWS_DEFAULT_REGION = os.environ["AWS_DEFAULT_REGION"]
 MODEL_ID = os.environ["BEDROCK_MODEL_ID"]
 
+def calculate_confidence(output_text):
+    high_keywords = ["definitely", "confirmed", "clearly", "root cause is"]
+    medium_keywords = ["likely", "possibly", "might be", "appears to be"]
+    low_keywords = ["may be", "unsure", "unclear", "unknown", "cannot determine"]
+
+    text = output_text.lower()
+
+    if any(k in text for k in high_keywords):
+        return 0.9
+    elif any(k in text for k in medium_keywords):
+        return 0.6
+    elif any(k in text for k in low_keywords):
+        return 0.3
+    return 0.5  # Default neutral confidence
+
+def needs_human_intervention(ai_output, confidence_score):
+    # Check if all required parts exist
+    required_parts = ["Root Cause:", "Next Steps:", "Severity:"]
+    if not all(part in ai_output for part in required_parts):
+        return True
+
+    # Extract severity
+    severity_line = [line for line in ai_output.split('\n') if line.startswith("Severity:")]
+    severity = severity_line[0].split(":")[1].strip() if severity_line else ""
+
+    # Decision logic
+    if confidence_score < 0.6:
+        return True
+    if severity.lower() == "high":
+        return True
+    return False
+
 def diagnose_with_bedrock(incident_description):
     bedrock = boto3.client("bedrock-runtime", region_name=AWS_DEFAULT_REGION)
 
@@ -92,4 +124,14 @@ Incident: {incident_description}
     )
 
     response_body = json.loads(response['body'].read().decode('utf-8'))
-    return response_body['content'][0]['text']
+
+    output_text = response_body['content'][0]['text']
+
+    confidence_score = calculate_confidence(output_text)
+    intervention_required = needs_human_intervention(output_text, confidence_score)
+
+    return {
+        "diagnosis": output_text,
+        "confidence_score": round(confidence_score, 2),
+        "needs_human_intervention": intervention_required
+    }
