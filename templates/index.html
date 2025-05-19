@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>The Witcher's AI Agent</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: #ffffff;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+
+    .team-card {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .team-card h1 {
+      font-size: 32px;
+      color: #00ffff;
+      margin-bottom: 10px;
+    }
+
+    .team-card p {
+      font-size: 16px;
+      color: #cbd5e1;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      resize: none;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px 20px;
+      margin-top: 10px;
+      background-color: #00bcd4;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0097a7;
+    }
+
+    .spinner {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #00ffff;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+      display: none;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+      background: #ffffff10;
+    }
+
+    table, th, td {
+      border: 1px solid #ffffff30;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      color: #ffffff;
+    }
+
+    th {
+      background-color: #00bcd4;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <div class="team-card">
+      <h1>AWS AgentX Hackathon</h1>
+      <p><strong>Team 25 (The Witcher's) : </strong> Shankhadeep, Bhupendra, Gursimran, Hemant, Sachin</p>
+      <p style="font-style: italic; color: #9fd3c7;">Powered by Deloitte</p>
+    </div>
+
+    <h2>Incident Prompt</h2>
+    <textarea id="incident" rows="5" placeholder="Enter incident details here..."></textarea><br>
+    <button onclick="sendIncident()">Run Agents</button>
+
+    <div class="spinner" id="loader"></div>
+
+    <div id="results"></div>
+  </div>
+
+  <script>
+    async function sendIncident() {
+      const incident = document.getElementById('incident').value;
+      const loader = document.getElementById('loader');
+      const resultsDiv = document.getElementById('results');
+
+      resultsDiv.innerHTML = '';
+      loader.style.display = 'block';
+
+      try {
+        const response = await fetch('/run_agents', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ incident })
+        });
+
+        const data = await response.json();
+        loader.style.display = 'none';
+
+        // Format response as a table
+        let tableHTML = '<table><tr><th>Agent</th><th>Response</th></tr>';
+        for (let key in data) {
+          tableHTML += `<tr><td>${key}</td><td>${data[key]}</td></tr>`;
+        }
+        tableHTML += '</table>';
+        resultsDiv.innerHTML = tableHTML;
+
+      } catch (err) {
+        loader.style.display = 'none';
+        resultsDiv.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+      }
+    }
+  </script>
+
+</body>
+</html>

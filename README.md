@@ -74,6 +74,10 @@ project-root/
  - Add multi-channel notifications (Slack, SMS).
  - Build a web dashboard for real-time incident tracking and analytics.
 
- ## Team
+## Install and Run Command
+ - Install COmmand : pip install -r requirements.txt
+ - RUN Command : python app.py --host=0.0.0.0
+
+## Team
  - Bhupendra Singh
  - Tech Lead/ Backend Developer
