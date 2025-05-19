@@ -8,14 +8,12 @@ from utils.logger import log
 import os
 
 # Load email recipient from environment or config
-EMAIL_RECIPIENT = os.getenv("STAKEHOLDER_EMAIL", "stakeholder@example.com")
+EMAIL_RECIPIENT = os.getenv("EMAIL_SEND_TO")
 
 incident = "Login service timing out for multiple users since 2 AM."
 
-def log(title, content=None):
-    print(title)
-    if content:
-        print(">>>>", content)
+print("Promt Ask :::::::::::::: ", incident, "\n")
+
 
 try:
     log("\n################  Running Diagnosis Agent  ################")
