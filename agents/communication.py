@@ -18,7 +18,7 @@ def send_test_email(incident, resolution, EMAIL_RECIPIENT):
             Destination={'ToAddresses': [EMAIL_SEND_TO]},
             Message={
                 'Subject': {'Data': 'Test Email from SES'},
-                'Body': {'Text': {'Data': 'This is a test email'}}
+                'Body': {'Text': {'Data': incident}}
             }
         )
         print("Email sent!", response)
