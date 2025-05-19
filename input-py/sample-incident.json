@@ -1,0 +1,6 @@
+{
+  "incidentId": "INC123456",
+  "description": "System outage detected",
+  "severity": "High",
+  "timestamp": "2025-06-08T10:00:00Z"
+}
