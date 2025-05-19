@@ -5,6 +5,7 @@ from agents.communication import send_test_email
 from agents.closure import validate_closure           # <-- import closure
 from agents.postmortem import generate_postmortem    # <-- import post-mortem
 from utils.logger import log
+from utils.dynamodb import fetch_dynamodb_items
 import os
 
 # Load email recipient from environment or config
@@ -63,3 +64,10 @@ try:
     print(">>>> Post-Mortem Summary:\n", postmortem)
 except Exception as e:
     print("Post-Mortem Generation Error  <<<< ", e)
+
+try:
+    log("\n################  Fetching Items from DynamoDB  ################")
+    items = fetch_dynamodb_items("ai-incident-management")
+    print("DynamoDB Items:", items)
+except Exception as e:
+    print("Error while fetching data from DB <<<< ", e)

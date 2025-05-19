@@ -6,11 +6,14 @@ from agents.communication import send_test_email
 from agents.closure import validate_closure
 from agents.postmortem import generate_postmortem
 from utils.logger import log
+from utils.dynamodb import fetch_dynamodb_items
+from utils.dynamodb import push_incident_to_dynamodb
 import os
 
 app = Flask(__name__)
 
 EMAIL_RECIPIENT = os.getenv("EMAIL_SEND_TO")
+TABLE_NAME = os.getenv("TABLE_NAME")
 
 @app.route('/')
 def index():
@@ -68,6 +71,21 @@ def run_agents():
         results['postmortem'] = postmortem
     except Exception as e:
         results['postmortem'] = f"Post-Mortem Generation failed: {str(e)}"
+
+    try:
+        log("\n################  Pushing Items to DynamoDB  ################")
+        items = push_incident_to_dynamodb(incident, resolution, TABLE_NAME)
+        print("DynamoDB DATA pushed successfully:")
+    except Exception as e:
+        print("Error while fetching data from DB <<<< ", e)    
+
+    try:
+        log("\n################  Fetching Items from DynamoDB  ################")
+        items = fetch_dynamodb_items("aiIncidentManagement")
+        print("DynamoDB Items:", items)
+    except Exception as e:
+        print("Error while fetching data from DB <<<< ", e)
+
 
     return jsonify(results)
 
