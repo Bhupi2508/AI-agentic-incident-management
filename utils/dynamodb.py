@@ -8,9 +8,6 @@ def push_incident_to_dynamodb(incident, resolution, TABLE_NAME):
     dynamodb = boto3.resource('dynamodb', region_name=AWS_DEFAULT_REGION)
     table = dynamodb.Table(TABLE_NAME)
 
-    print(f"incident::::::::::::::::: {incident}")
-    print(f"resolution::::::::::::::::: {resolution}")
-
     # Prepare the data
     incident_data = {
         'incident_id': str(uuid.uuid4()),  # Primary key

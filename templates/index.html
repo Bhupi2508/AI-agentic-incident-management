@@ -1,6 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The Witcher's AI Agent</title>
   <style>
     body {
@@ -8,16 +11,16 @@
       margin: 0;
       padding: 0;
       background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-      color: #ffffff;
+      color: #fff;
     }
 
     .container {
       max-width: 900px;
       margin: 30px auto;
-      padding: 20px;
+      padding: 25px 30px;
       background: rgba(255, 255, 255, 0.05);
       border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
     }
 
     .team-card {
@@ -28,130 +31,314 @@
     .team-card h1 {
       font-size: 32px;
       color: #00ffff;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .team-card p {
       font-size: 16px;
       color: #cbd5e1;
+      margin: 4px 0;
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 6px;
+      font-size: 15px;
+    }
+
+    .required {
+      color: #ff4d4d;
+    }
+
+    #incidentId-container {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 6px;
     }
 
     textarea {
-      width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
       resize: none;
-      font-size: 16px;
     }
 
-    button {
-      padding: 12px 20px;
-      margin-top: 10px;
+    textarea#incidentId {
+      flex: 1;
+      height: 22px;
+      padding: 8px 12px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      font-family: inherit;
+      color: #000;
+    }
+
+    button#checkBtn {
+      padding: 10px 18px;
+      font-weight: 600;
       background-color: #00bcd4;
       color: white;
-      font-weight: bold;
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      transition: 0.3s ease;
     }
 
-    button:hover {
-      background-color: #0097a7;
+    button#checkBtn:disabled {
+      background-color: #555;
+      cursor: not-allowed;
     }
 
-    .spinner {
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid #00ffff;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 20px auto;
-      display: none;
+    textarea#incidentDesc {
+      width: 100%;
+      min-height: 62px;
+      padding: 10px 12px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      font-family: inherit;
+      color: #000;
+      margin-bottom: 6px;
     }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    button#submitBtn {
+      margin-top: 14px;
+      padding: 14px 26px;
+      font-weight: 700;
+      background-color: #00bcd4;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      width: 100%;
+    }
+
+    button#submitBtn:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+    }
+
+    .error {
+      color: #ff6b6b;
+      font-size: 14px;
+      margin-bottom: 10px;
+      min-height: 18px;
+    }
+
+    #availabilityMsg {
+      font-weight: 600;
+      font-size: 15px;
+      min-height: 20px;
+      margin-bottom: 10px;
+    }
+
+    #availabilityMsg.success {
+      color: #4ade80;
+    }
+
+    #availabilityMsg.warning {
+      color: #fbbf24;
+    }
+
+    #availabilityMsg.error {
+      color: #f87171;
     }
 
     table {
       width: 100%;
-      margin-top: 20px;
       border-collapse: collapse;
-      background: #ffffff10;
+      margin-top: 20px;
+      color: #fff;
     }
 
-    table, th, td {
-      border: 1px solid #ffffff30;
+    table,
+    th,
+    td {
+      border: 1px solid #00bcd4;
     }
 
-    th, td {
-      padding: 12px;
+    th,
+    td {
+      padding: 8px 12px;
       text-align: left;
-      color: #ffffff;
     }
 
     th {
-      background-color: #00bcd4;
-      color: #000;
+      background-color: #007c91;
     }
   </style>
 </head>
+
 <body>
-
   <div class="container">
-
     <div class="team-card">
       <h1>AWS AgentX Hackathon</h1>
-      <p><strong>Team 25 (The Witcher's) : </strong> Shankhadeep, Bhupendra, Gursimran, Hemant, Sachin</p>
-      <p style="font-style: italic; color: #9fd3c7;">Powered by Deloitte (Currently is in Development Phase...)</p>
+      <p><strong>Team 25 (The Witcher's):</strong> Shankhadeep, Bhupendra, Gursimran, Hemant, Sachin</p>
+      <p style="font-style: italic; color: #9fd3c7;">Powered by Deloitte (Currently in Development Phase...)</p>
     </div>
 
-    <h2>Incident Prompt</h2>
-    <textarea id="incident" rows="5" placeholder="Enter incident details here..."></textarea><br>
-    <button onclick="sendIncident()">Run Agents</button>
+    <label for="incidentId">Incident Id <span class="required">*</span></label>
+    <div id="incidentId-container">
+      <textarea id="incidentId" placeholder="Enter incident Id here (must start with INC)..."></textarea>
+      <button id="checkBtn" disabled>Check Availability</button>
+    </div>
+    <div id="idError" class="error"></div>
+    <div id="availabilityMsg"></div>
 
-    <div class="spinner" id="loader"></div>
+    <label for="incidentDesc">Incident Description <span class="required">*</span></label>
+    <textarea id="incidentDesc" placeholder="Enter incident details here..." disabled></textarea>
+    <div id="descError" class="error"></div>
 
-    <div id="results"></div>
+    <button id="submitBtn" disabled>Run Agents</button>
+    <div id="loadingSpinner" style="display:none; text-align:center; margin-top: 20px;">
+      <img src="https://i.gifer.com/ZZ5H.gif" alt="Loading..." width="50" />
+    </div>
   </div>
 
   <script>
-    async function sendIncident() {
-      const incident = document.getElementById('incident').value;
-      const loader = document.getElementById('loader');
-      const resultsDiv = document.getElementById('results');
 
-      resultsDiv.innerHTML = '';
-      loader.style.display = 'block';
+    const incidentIdInput = document.getElementById('incidentId');
+    const incidentDescInput = document.getElementById('incidentDesc');
+    const checkBtn = document.getElementById('checkBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const idError = document.getElementById('idError');
+    const descError = document.getElementById('descError');
+    const availabilityMsg = document.getElementById('availabilityMsg');
+
+    let isExistingIncident = false;
+
+    incidentIdInput.addEventListener('input', () => {
+      const val = incidentIdInput.value.trim().toUpperCase();
+      incidentIdInput.value = val;
+      idError.textContent = '';
+      checkBtn.disabled = true;
+      availabilityMsg.textContent = '';
+      submitBtn.disabled = true;
+      incidentDescInput.disabled = true;
+      incidentDescInput.value = '';
+
+      if (!val.startsWith('INC')) {
+        idError.textContent = "Incident ID must start with 'INC'.";
+        return;
+      }
+      if (val.length < 4 || val.length > 10) {
+        idError.textContent = "Incident ID must be 4 to 10 characters.";
+        return;
+      }
+
+      checkBtn.disabled = false;
+    });
+
+    checkBtn.addEventListener('click', async () => {
+      const incidentId = incidentIdInput.value.trim();
+
+      if (!incidentId) {
+        idError.textContent = "Incident ID is required.";
+        return;
+      }
+
+      try {
+        availabilityMsg.textContent = 'Checking...';
+        availabilityMsg.className = '';
+
+        const response = await fetch('/check_incident', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ incidentId })
+        });
+
+        const result = await response.json();
+
+        if (result.exists) {
+          isExistingIncident = true;
+          availabilityMsg.textContent = '✅ Incident already exists, please proceed.';
+          availabilityMsg.className = 'success';
+          incidentDescInput.disabled = true;
+          submitBtn.disabled = false;
+        } else {
+          isExistingIncident = false;
+          availabilityMsg.textContent = 'Incident not found. Please enter description to proceed';
+          availabilityMsg.className = 'warning';
+          incidentDescInput.disabled = false;
+          submitBtn.disabled = true;
+        }
+      } catch (err) {
+        availabilityMsg.textContent = '❌ Error checking incident';
+        availabilityMsg.className = 'error';
+        console.error(err);
+      }
+    });
+
+    incidentDescInput.addEventListener('input', () => {
+      descError.textContent = '';
+      if (!isExistingIncident && incidentDescInput.value.trim().length > 10) {
+        submitBtn.disabled = false;
+      } else {
+        submitBtn.disabled = true;
+      }
+    });
+
+    submitBtn.addEventListener('click', async () => {
+      // Clear any previous errors
+      descError.textContent = '';
+
+      if (!isExistingIncident && incidentDescInput.value.trim().length <= 8) {
+        descError.textContent = 'Description must be at least 8 characters.';
+        return;
+      }
+
+      const payload = {
+        incidentId: incidentIdInput.value.trim(),
+        incidentDesc: isExistingIncident ? null : incidentDescInput.value.trim()
+      };
+
+      // Show spinner
+      loadingSpinner.style.display = 'block';
 
       try {
         const response = await fetch('/run_agents', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ incident })
+          body: JSON.stringify(payload)
         });
 
         const data = await response.json();
-        loader.style.display = 'none';
 
-        // Format response as a table
-        let tableHTML = '<table><tr><th>Agent</th><th>Response</th></tr>';
-        for (let key in data) {
-          tableHTML += `<tr><td>${key}</td><td>${data[key]}</td></tr>`;
+        let resultsDiv = document.getElementById('resultsDiv');
+        if (!resultsDiv) {
+          resultsDiv = document.createElement('div');
+          resultsDiv.id = 'resultsDiv';
+          document.querySelector('.container').appendChild(resultsDiv);
         }
-        tableHTML += '</table>';
+
+        // Build table HTML
+        let tableHTML = '<table><thead><tr><th>Agent</th><th>Response</th></tr></thead><tbody>';
+
+        // Assuming data is an object where keys = agents, values = responses
+        for (const key in data) {
+          const safeResponse = data[key] ? data[key].toString().replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+          tableHTML += `<tr><td>${key}</td><td>${safeResponse}</td></tr>`;
+        }
+
+        tableHTML += '</tbody></table>';
+
         resultsDiv.innerHTML = tableHTML;
 
       } catch (err) {
-        loader.style.display = 'none';
+        let resultsDiv = document.getElementById('resultsDiv');
+        if (!resultsDiv) {
+          resultsDiv = document.createElement('div');
+          resultsDiv.id = 'resultsDiv';
+          document.querySelector('.container').appendChild(resultsDiv);
+        }
         resultsDiv.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+      } finally {
+        // Hide spinner
+        loadingSpinner.style.display = 'none';
       }
-    }
-  </script>
+    });
 
+  </script>
 </body>
+
 </html>

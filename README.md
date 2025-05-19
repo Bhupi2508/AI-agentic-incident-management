@@ -77,6 +77,8 @@ project-root/
 ## Install and Run Command
  - Install COmmand : pip install -r requirements.txt
  - RUN Command : python app.py --host=0.0.0.0
+ - python setup_dynamodb_table.py  ::: Run Script to create the table
+ ![alt text](image.png)
 
 ## Team
  - Bhupendra Singh
