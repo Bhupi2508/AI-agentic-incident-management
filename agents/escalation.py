@@ -1,16 +1,23 @@
 def escalate(diagnosis_result):
-    # Split by lines and find the severity line
-    lines = diagnosis_result.strip().splitlines()
-    severity_line = next((line for line in lines if line.lower().startswith("severity:")), None)
+    try:
+        # Parse string to JSON (if not already parsed)
+        if isinstance(diagnosis_result, str):
+            diagnosis_result = json.loads(diagnosis_result)
 
-    if severity_line:
-        severity = severity_line.split(":", 1)[1].strip().lower()
-        if severity == "high":
+        severity = diagnosis_result.get("severity", "").strip().lower()
+
+        if severity == "blocker":
+            return "Escalated to Platform Incident Commander"
+        elif severity == "critical":
             return "Escalated to SME (Subject Matter Expert)"
+        elif severity == "high":
+            return "Escalated to Level 3 Support"
         elif severity == "medium":
             return "Escalated to Level 2 Support"
-        else:
+        elif severity == "low":
             return "No escalation needed. Handled by automation."
-    
-    # If severity line not found, fallback safe option:
-    return "No escalation needed. Handled by automation."
+        else:
+            return "Unknown severity. Escalation not triggered."
+
+    except Exception as e:
+        return f"Error in escalation logic: {str(e)}"
