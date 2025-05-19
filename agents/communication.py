@@ -6,6 +6,7 @@ import os
 load_dotenv()
 
 AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION")
+EMAIL_SEND_TO = os.getenv("EMAIL_SEND_TO")
 
 ses_client = boto3.client('ses', region_name=AWS_DEFAULT_REGION)
 
@@ -15,7 +16,7 @@ def send_update(incident, resolution, recipient_email):
 
     try:
         response = ses_client.send_email(
-            Source="bhupsingh@deloitte.com",
+            Source=EMAIL_SEND_TO,
             Destination={'ToAddresses': [recipient_email]},
             Message={
                 'Subject': {'Data': subject},
