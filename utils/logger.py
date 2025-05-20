@@ -1,2 +1,2 @@
 def log(*args):
-    print("[LOG]", *args)
+    print("\n[LOG]", *args)

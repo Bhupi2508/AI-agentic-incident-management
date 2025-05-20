@@ -34,9 +34,6 @@ def run_agents():
     incident_id = data.get('incidentId', '')
     incident_desc = data.get('incidentDesc', '')
 
-    print("di22222        ", incident_id)
-    print("di22222        ", incident_desc)
-
     if not incident_id:
         return jsonify({'error': 'incidentId is required'}), 400
 
@@ -78,7 +75,7 @@ def run_agents():
     # DIAGNOSIS agent
     try:
         if start_index <= 0:
-            log("\n************ Running Diagnosis Agent ************")
+            log("************ Running Diagnosis Agent ************")
             diagnosis = diagnose_with_bedrock(incident_desc)
             print("++++++ diagnosis final response :::::::: ", diagnosis)
             results['diagnosis'] = diagnosis
@@ -93,10 +90,9 @@ def run_agents():
     # ESCALATION agent
     try:
         if start_index <= 1:
-            log("\n************ Running Escalation Agent ************")
+            log("************ Running Escalation Agent ************")
             escalation_input = results.get('diagnosis', '') or (item.get('diagnosis') if item else '')
             escalation = extract_severity_and_respond(escalation_input)
-            print("++++++ escalation final response :::::::: ", escalation)
             results['escalation'] = escalation
             update_attrs['escalation'] = escalation
             update_attrs['status'] = "ESCALATION"
