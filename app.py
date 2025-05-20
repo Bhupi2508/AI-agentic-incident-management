@@ -168,11 +168,8 @@ def run_agents():
         if start_index <= 4:
             log("Running Closure Agent Start #################################################")
 
-            # Add dummy or fetched values if user_feedback/system_logs not provided
-            user_feedback = data.get('userFeedback', 'Positive feedback received.')
-            system_logs = data.get('systemLogs', 'No anomalies detected in logs.')
-
-            closure_status = validate_closure(user_feedback, system_logs)
+            # user_feedback/system_logs not yet provided
+            closure_status = validate_closure({'userFeedback': '', 'systemLogs': ''})
             print("+++++++++++++++ CLOSURE data :::::::: ", closure_status)
             results['closure'] = closure_status
             results['status'] = "CLOSURE"
@@ -217,6 +214,8 @@ def run_agents():
         except Exception as e:
             log(f"❌ Error while pushing incident data to DynamoDB: {str(e)}")
 
+            del results['needs_human_intervention']
+            del results['severity']
         return jsonify(results)
     except Exception as e:
         results['postmortem'] = f"Post-Mortem Generation failed: {str(e)}"
