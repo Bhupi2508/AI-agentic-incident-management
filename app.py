@@ -96,45 +96,44 @@ def run_agents():
             results['escalation'] = escalation
             update_attrs['escalation'] = escalation
             update_attrs['status'] = "ESCALATION"
-            update_attrs['updateTime'] = datetime.utcnow().isoformat()
+            update_attrs['updateTime'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
         else:
             results['escalation'] = item.get('escalation') if item else ''
     except Exception as e:
         results['escalation'] = f"Escalation failed: {str(e)}"
 
-#     # RESOLUTION agent
-#     try:
-#         if start_index <= 2:
-#             log("Running Resolution Agent")
-#             resolution_input = results.get('diagnosis', '') or (item.get('diagnosis') if item else '')
-#             resolution = resolve_issue(resolution_input)
-#             results['resolution'] = resolution
-#             update_attrs['resolution'] = resolution
-#             update_attrs['status'] = "RESOLUTION"
-#             update_attrs['updateTime'] = datetime.utcnow().isoformat()
-#         else:
-#             results['resolution'] = item.get('resolution') if item else ''
-#     except Exception as e:
-#         results['resolution'] = f"Resolution failed: {str(e)}"
+    # RESOLUTION agent
+    try:
+        if start_index <= 2:
+            log("************ Running Resolution Agent ************")
+            resolution_input = results.get('diagnosis', '') or (item.get('diagnosis') if item else '')
+            resolution = resolve_issue(resolution_input)
+            results['resolution'] = resolution
+            update_attrs['resolution'] = resolution
+            update_attrs['status'] = "RESOLUTION"
+            update_attrs['updateTime'] = datetime.utcnow().isoformat()
+        else:
+            results['resolution'] = item.get('resolution') if item else ''
+    except Exception as e:
+        results['resolution'] = f"Resolution failed: {str(e)}"
 
-#     # COMMUNICATION agent
-#     try:
-#         if start_index <= 3:
-#             log("Running Communication Agent")
-#             # Here you can uncomment to send actual email
-#             # send_test_email(incident_desc, results.get('resolution', ''), EMAIL_RECIPIENT)
-#             results['communication'] = "Email sent successfully."
-#             update_attrs['communication'] = results['communication']
-#             update_attrs['status'] = "COMMUNICATION"
-#             update_attrs['updateTime'] = datetime.utcnow().isoformat()
-#         else:
-#             results['communication'] = item.get('communication') if item else ''
-#     except Exception as e:
-#         results['communication'] = f"Communication Error: {str(e)}"
+    # COMMUNICATION agent
+    try:
+        if start_index <= 3:
+            log("************ Running Communication Agent ************")
+            send_test_email(incident_desc, escalation, results.get('resolution', ''), EMAIL_RECIPIENT)
+            results['communication'] = "Email sent successfully."
+            update_attrs['communication'] = results['communication']
+            update_attrs['status'] = "COMMUNICATION"
+            update_attrs['updateTime'] = datetime.utcnow().isoformat()
+        else:
+            results['communication'] = item.get('communication') if item else ''
+    except Exception as e:
+        results['communication'] = f"Communication Error: {str(e)}"
 
-#     # Simulated user feedback and system logs for Closure agent
-#     user_feedback = "The issue fixed after service restart."
-#     system_logs = "No errors reported in last 30 minutes."
+    # Simulated user feedback and system logs for Closure agent
+    user_feedback = "The issue fixed after service restart."
+    system_logs = "No errors reported in last 30 minutes."
 
 #     # CLOSURE agent
 #     try:
