@@ -7,10 +7,9 @@ from agents.closure import validate_closure
 from agents.postmortem import generate_postmortem
 from datetime import datetime, timezone
 from utils.logger import log
-from utils.dynamodb import fetch_dynamodb_items, update_incident_in_dynamodb
+from utils.dynamodb import fetch_dynamodb_item, update_incident_in_dynamodb
 import boto3
 import os
-from datetime import datetime
 
 app = Flask(__name__)
 
@@ -28,6 +27,7 @@ def index():
     # Render the main HTML page when user visits root URL
     return render_template('index.html')
 
+
 @app.route('/run_agents', methods=['POST'])
 def run_agents():
     data = request.get_json()
@@ -40,11 +40,19 @@ def run_agents():
     if not incident_id:
         return jsonify({'error': 'incidentId is required'}), 400
 
-    # Fetch incident data from DynamoDB to get current status and any saved info
-    try:
-        item = fetch_dynamodb_items(table,incident_id)
-    except Exception as e:
-        return jsonify({'error': f"Error fetching incident from DB: {str(e)}"}), 500
+    item = fetch_dynamodb_item(table, incident_id)
+    results1 = {}
+    # Check if the incident status is "POSTMORTEM"
+    if item and item.get("status") == "POSTMORTEM":
+        print("If status is POSTMORTEM ....")
+        # Directly populate results1 from the DB
+        results1['status'] = item.get('status', '')
+        results1['closure'] = item.get('closure', '')
+        results1['communication'] = item.get('communication', '')
+        results1['diagnosis'] = item.get('diagnosis', '')
+        results1['escalation'] = item.get('escalation', '')
+        results1['postmortem'] = item.get('postmortem', '')
+        return results1 
 
     # Define the sequence of incident handling stages (agents)
     status_order = [
@@ -204,6 +212,7 @@ def run_agents():
     except Exception as e:
         results['postmortem'] = f"Post-Mortem Generation failed: {str(e)}"
 
+
 @app.route('/check_incident', methods=['POST'])
 def check_incident():
     try:
@@ -222,6 +231,7 @@ def check_incident():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

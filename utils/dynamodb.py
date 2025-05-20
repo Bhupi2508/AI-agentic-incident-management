@@ -3,11 +3,6 @@ import os
 import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
-AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION")
-
-import boto3
-import uuid
-import os
 
 AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION")
 
@@ -42,11 +37,6 @@ def add_incident_to_dynamodb(incident, resolution, status, TABLE_NAME):
     except Exception as e:
         print("Failed to add incident to DynamoDB:", e)
         return None
-    
-from datetime import datetime, timezone
-from decimal import Decimal
-import boto3
-import os
 
 # Converts floats to Decimals recursively
 def convert_floats_to_decimal(obj):
@@ -58,6 +48,7 @@ def convert_floats_to_decimal(obj):
         return [convert_floats_to_decimal(i) for i in obj]
     else:
         return obj
+
 
 def update_incident_in_dynamodb(incident_id, update_fields, TABLE_NAME):
     dynamodb = boto3.resource('dynamodb', region_name=os.getenv("AWS_DEFAULT_REGION"))
@@ -111,15 +102,13 @@ def update_incident_in_dynamodb(incident_id, update_fields, TABLE_NAME):
         print(f"❌ Failed to update incident {incident_id}:", e)
 
 
-def fetch_dynamodb_items(table_name, incident_id):
-    dynamodb = boto3.resource('dynamodb', region_name=AWS_DEFAULT_REGION)
-    table = dynamodb.Table(table_name)
-
+def fetch_dynamodb_item(table, incident_id):
     try:
         response = table.get_item(Key={'incidentId': incident_id})
-        data = response.get('Items')
-        print("::::::::::::: ", data)
-        return data
+        print(":::11:::::::::: ", response)
+        item = response.get('Item')
+        print("::::::::::::: ", item)
+        return item
     except Exception as e:
         print(f"Error fetching data from DynamoDB: {e}")
-        return []
+        return None
