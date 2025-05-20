@@ -8,14 +8,7 @@ load_dotenv()
 AWS_DEFAULT_REGION = os.environ["AWS_DEFAULT_REGION"]
 MODEL_ID = os.environ["BEDROCK_MODEL_ID"]
 
-# Load rules from external JSON file
-current_dir = os.path.dirname(os.path.abspath(__file__))
-
-# create full path to the JSON file inside the same folder as diagnosis.py
-rules_path = os.path.join(current_dir, "severity_rules.json")
-
-with open(rules_path, "r") as f:
-    SEVERITY_RULES = json.load(f)
+SEVERITY_RULES = [{"conditions":["data loss","system crash","server down","complete failure","unrecoverable","permanent loss","database corruption","database down","security breach","payment failure","unable to login","authentication failed"],"severity":"Blocker"},{"conditions":["critical","production issue","prod down","latency spike","memory leak","cpu 100%","process killed","deadlock","high severity","infinite loop","timeout error"],"severity":"Critical"},{"conditions":["timeout","504","gateway timeout","system not responding","connection refused","failed dependency","retry limit reached","disk full","unavailable","service unavailable"],"severity":"High"},{"conditions":["minor","cosmetic","typo","spelling mistake","alignment issue","UI glitch","feedback","low impact","suggestion","warning only","non-blocking"],"severity":"Low"},{"conditions":["slow","latency","degraded","not loading properly","cache not working","delay in response","partial outage","memory warning","temporary error","inconsistent results","intermittent issue"],"severity":"Medium"}]
 
 
 # This function sends the incident description to the AI model and processes the response to extract root cause, next steps, severity, and calculates confidence and human intervention need.
