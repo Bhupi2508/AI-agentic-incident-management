@@ -74,8 +74,11 @@ def escalate(severity):
         return "⚠️ Unknown severity – fallback to automation"
 
 def extract_severity_and_respond(diagnosis_result):
+    print("111111111111111111111", diagnosis_result)
     lines = diagnosis_result.strip().splitlines()
+    print("22222222222222222222", lines)
     severity_line = next((line for line in lines if line.lower().startswith("severity:")), None)
+    print("33333333333333333333333", severity_line)
 
     if severity_line:
         severity = severity_line.split(":", 1)[1].strip()

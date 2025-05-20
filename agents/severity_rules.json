@@ -1,0 +1,50 @@
+[
+    {
+        "severity": "Blocker",
+        "conditions": [
+            "system is down",
+            "login failure",
+            "authentication failure",
+            "database outage",
+            "affects all users",
+            "no workaround"
+        ]
+    },
+    {
+        "severity": "Critical",
+        "conditions": [
+            "payment fails",
+            "core business flow fails",
+            "data loss",
+            "data corruption",
+            "major api is unresponsive",
+            "affects large user group"
+        ]
+    },
+    {
+        "severity": "High",
+        "conditions": [
+            "services degraded",
+            "services failing",
+            "affects some users",
+            "workaround exists"
+        ]
+    },
+    {
+        "severity": "Medium",
+        "conditions": [
+            "internal tool issue",
+            "performance slowness",
+            "niche case failure"
+        ]
+    },
+    {
+        "severity": "Low",
+        "conditions": [
+            "ui glitch",
+            "cosmetic bug",
+            "logging issue",
+            "no business impact"
+        ]
+    }
+]
