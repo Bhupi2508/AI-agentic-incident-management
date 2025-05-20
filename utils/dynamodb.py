@@ -92,8 +92,8 @@ def update_incident_in_dynamodb(incident_id, update_fields, TABLE_NAME):
         expression_attribute_values[placeholder] = value
 
     # Add updatedAt timestamp
-    update_expression_parts.append("updated_at = :updated_at")
-    expression_attribute_values[":updated_at"] = datetime.now(timezone.utc).isoformat()
+    update_expression_parts.append("updated_at = :updated")
+    expression_attribute_values[":updated"] = datetime.now(timezone.utc).isoformat()
 
     update_expression = "SET " + ", ".join(update_expression_parts)
 
