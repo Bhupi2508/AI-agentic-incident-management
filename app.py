@@ -142,8 +142,8 @@ def run_agents():
             diagnosis = results.get('diagnosis', '') or (item.get('diagnosis') if item else '')
             escalation = results.get('escalation', '') or (item.get('escalation') if item else '')
             resolution = results.get('resolution', '') or (item.get('resolution') if item else '')
-            send_test_email(incident_desc, escalation, results.get('resolution', ''), incident_id, EMAIL_RECIPIENT)
-            print("+++++++++++++++ COMMUNICATION data :::::::: ")
+            data = send_test_email(incident_desc, escalation, results.get('resolution', ''), incident_id, EMAIL_RECIPIENT)
+            print("+++++++++++++++ COMMUNICATION data :::::::: ", data)
             results['communication'] = "Email sent successfully."
             results['status'] = "COMMUNICATION"
             update_attrs['communication'] = results['communication']
