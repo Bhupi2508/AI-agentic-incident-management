@@ -23,8 +23,8 @@ def add_incident_to_dynamodb(incident, resolution, status, TABLE_NAME):
         'incident': incident,
         'resolution': resolution,
         'status': status,
-        'createdAt': timestamp,
-        'updatedAt': timestamp,
+        'created_at': timestamp,
+        'updated_at': timestamp,
         'diagnosis': None,
         'escalation': None,
         'resolution': None,
@@ -92,8 +92,10 @@ def update_incident_in_dynamodb(incident_id, update_fields, TABLE_NAME):
         expression_attribute_values[placeholder] = value
 
     # Add updatedAt timestamp
-    update_expression_parts.append("updated_at = :updated")
-    expression_attribute_values[":updated"] = datetime.now(timezone.utc).isoformat()
+    if "updated_at" not in update_fields and not any("updated_at" in str(v) for v in update_fields.values()):
+        update_expression_parts.append("updated_at = :updated_at")
+        expression_attribute_values[":updated_at"] = datetime.now(timezone.utc).isoformat()
+
 
     update_expression = "SET " + ", ".join(update_expression_parts)
 

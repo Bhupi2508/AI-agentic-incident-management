@@ -34,8 +34,8 @@ def run_agents():
     incident_id = data.get('incidentId', '')
     incident_desc = data.get('incidentDesc', '')
 
-    log("incident_id :::: ", incident_id)
-    log("incident_desc :::: ", incident_desc)
+    print("incident_id :::: ", incident_id)
+    print("incident_desc :::: ", incident_desc)
 
     if not incident_id:
         return jsonify({'error': 'incidentId is required'}), 400
