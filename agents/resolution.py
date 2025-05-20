@@ -4,19 +4,19 @@ def resolve_issue(diagnosis_result):
     root_cause = diagnosis_result.get("diagnosis", {}).get("root_cause", "").lower()
     next_steps = diagnosis_result.get("diagnosis", {}).get("next_steps", "").lower()
     combined_text = root_cause + " " + next_steps
-
+ 
     resolution_map = {
-        "restart": "Auto-resolved by restarting the service.",
-        "config": "Suggested configuration changes have been applied.",
-        "scale out": "Auto-scaled the service to handle increased load.",
-        "rollback": "Rolled back to the previous stable version.",
-        "database": "Database performance issues addressed.",
-        "network": "Network connectivity issues resolved.",
-        "resource": "Resource constraints mitigated by adding more capacity.",
-        "bug": "Bug fix deployed to resolve the issue.",
-        "timeout": "Timeout parameters adjusted to improve service responsiveness.",
-        "cache": "Cache cleared or caching mechanism optimized.",
-        "failover": "Failover mechanisms triggered to maintain availability."
+        "restart": "Recommended to restart the service based on diagnosis.",
+        "config": "Configuration changes may help mitigate the issue.",
+        "scale out": "Scaling out the service might reduce load pressure.",
+        "rollback": "Rolling back to a stable version is suggested.",
+        "database": "Database tuning or optimization required.",
+        "network": "Network-level fixes or DNS checks may resolve the issue.",
+        "resource": "Consider adding resources or freeing up memory/CPU.",
+        "bug": "Possible bug found — escalate to dev team.",
+        "timeout": "Timeout values can be increased as a temporary workaround.",
+        "cache": "Review or clear cache for improved performance.",
+        "failover": "Check failover configuration to maintain uptime."
     }
 
     for keyword, resolution_msg in resolution_map.items():
