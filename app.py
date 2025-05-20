@@ -75,7 +75,7 @@ def run_agents():
     # DIAGNOSIS agent
     try:
         if start_index <= 0:
-            log("************ Running Diagnosis Agent ************")
+            log(">>>>>>>> Running Diagnosis Agent >>>>>>>>")
             diagnosis = diagnose_with_bedrock(incident_desc)
             results['diagnosis'] = diagnosis['diagnosis']
             update_attrs['diagnosis'] = diagnosis
@@ -89,8 +89,11 @@ def run_agents():
     # ESCALATION agent
     try:
         if start_index <= 1:
-            log("************ Running Escalation Agent ************")
-            escalation_input = results.get('diagnosis', '') or (item.get('diagnosis') if item else '')
+            log(">>>>>>>> Running Escalation Agent >>>>>>>>")
+            if incident_desc is None:
+                diagnosis = item.get('diagnosis') if item else ''
+            else:
+                escalation_input = results.get('diagnosis', '') or (item.get('diagnosis') if item else '')
             escalation = extract_severity_and_respond(escalation_input)
             results['escalation'] = escalation
             update_attrs['escalation'] = escalation
@@ -104,13 +107,16 @@ def run_agents():
     # RESOLUTION agent
     try:
         if start_index <= 2:
-            log("************ Running Resolution Agent ************")
-            resolution_input = results.get('diagnosis', '') or (item.get('diagnosis') if item else '')
+            log(">>>>>>>> Running Resolution Agent >>>>>>>>")
+            if incident_desc is None:
+                diagnosis = item.get('diagnosis') if item else ''
+            else:
+                resolution_input = results.get('diagnosis', '') or (item.get('diagnosis') if item else '')
             resolution = resolve_issue(resolution_input)
             results['resolution'] = resolution
             update_attrs['resolution'] = resolution
             update_attrs['status'] = "RESOLUTION"
-            update_attrs['updateTime'] = datetime.utcnow().isoformat()
+            update_attrs['updateTime'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
         else:
             results['resolution'] = item.get('resolution') if item else ''
     except Exception as e:
@@ -119,12 +125,16 @@ def run_agents():
     # COMMUNICATION agent
     try:
         if start_index <= 3:
-            log("************ Running Communication Agent ************")
+            log(">>>>>>>> Running Communication Agent >>>>>>>>")
+            if incident_desc is None:
+                diagnosis = item.get('diagnosis') if item else ''
+                escalation = item.get('escalation') if item else ''
+                resolution = item.get('resolution') if item else ''
             # send_test_email(incident_desc, escalation, results.get('resolution', ''), EMAIL_RECIPIENT)
             results['communication'] = "Email sent successfully."
             update_attrs['communication'] = results['communication']
             update_attrs['status'] = "COMMUNICATION"
-            update_attrs['updateTime'] = datetime.utcnow().isoformat()
+            update_attrs['updateTime'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
         else:
             results['communication'] = item.get('communication') if item else ''
     except Exception as e:
@@ -134,7 +144,7 @@ def run_agents():
     # CLOSURE agent
     try:
         if start_index <= 4:
-            log("************ Running Closure Agent ************")
+            log(">>>>>>>> Running Closure Agent >>>>>>>>")
 
             # Add dummy or fetched values if user_feedback/system_logs not provided
             user_feedback = data.get('userFeedback', 'Positive feedback received.')
@@ -144,7 +154,7 @@ def run_agents():
             results['closure'] = closure_status
             update_attrs['closure'] = closure_status
             update_attrs['status'] = "CLOSURE"
-            update_attrs['updateTime'] = datetime.utcnow().isoformat()
+            update_attrs['updateTime'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
         else:
             results['closure'] = item.get('closure') if item else ''
     except Exception as e:
@@ -153,12 +163,19 @@ def run_agents():
     # POSTMORTEM agent
     try:
         if start_index <= 5:
-            log("Running Post-Mortem Agent")
-            postmortem = generate_postmortem(incident_desc, results.get('diagnosis', ''), results.get('resolution', ''), escalation)
+            if incident_desc is None:
+                incident_desc = item.get('incident_desc') if item else ''
+                diagnosis = item.get('diagnosis') if item else ''
+                resolution = item.get('resolution') if item else ''
+                escalation = item.get('escalation') if item else ''
+
+            log(">>>>>>>> Running Post-Mortem Agent >>>>>>>>")
+            print('-----00', incident_desc, diagnosis, resolution)
+            postmortem = generate_postmortem(incident_desc, results.get('diagnosis', diagnosis), results.get('resolution', resolution), escalation)
             results['postmortem'] = postmortem
             update_attrs['postmortem'] = postmortem
             update_attrs['status'] = "POSTMORTEM"
-            update_attrs['updateTime'] = datetime.utcnow().isoformat()
+            update_attrs['updateTime'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
         else:
             results['postmortem'] = item.get('postmortem') if item else ''
     except Exception as e:
@@ -167,6 +184,23 @@ def run_agents():
 
     # Push all updates to DynamoDB at once
     try:
+        if incident_desc is None:
+            incident_desc = item.get('incident_desc') if item else ''
+            diagnosis = item.get('diagnosis') if item else ''
+            resolution = item.get('resolution') if item else ''
+            escalation = item.get('escalation') if item else ''
+            closure = item.get('closure') if item else ''
+            results['closure'] = item['closure']
+            results['resolution'] = resolution
+            results['escalation'] = escalation
+            results['diagnosis'] = diagnosis
+            update_attrs['diagnosis'] = diagnosis
+            update_attrs['resolution'] = resolution
+            update_attrs['escalation'] = escalation
+            update_attrs['closure'] = closure
+
+
+        print("00000000000 ", )
         # Note: update_attrs already contains incidentId, status, updateTime, and all agent outputs
         update_attrs['description'] = incident_desc
         update_incident_in_dynamodb(incident_id, update_attrs, LATEST_TABLE_NAME)
@@ -174,16 +208,26 @@ def run_agents():
     except Exception as e:
         log(f"Error while pushing incident data to DynamoDB: {str(e)}")
 
-    results['diagnosis'] = str(results['diagnosis'])
-    results['escalation'] = str(results['escalation'])
+        # Fetch incident data from DynamoDB to get current status
+        try:
+            response = table.get_item(Key={'incidentId': incident_id})
+            item = response.get('Item')
+            print("222222222222 ", item)
+        except Exception as e:
+            return jsonify({'error': f"Error fetching incident from DB: {str(e)}"}), 500
 
-    # Fetch incident data from DynamoDB to get current status
-    try:
-        response = table.get_item(Key={'incidentId': incident_id})
-        item = response.get('Item')
-    except Exception as e:
-        return jsonify({'error': f"Error fetching incident from DB: {str(e)}"}), 500
-    results["status"] = item['status']
+        if incident_desc is None:
+            results['status'] = item['status']
+            results['closure'] = item['closure']
+            results['postmortem'] = item['postmortem']
+            results['resolution'] = item['resolution']
+            results['escalation'] = item['escalation']
+            results['diagnosis'] = item['diagnosis']['diagnosis']
+        else:
+            results['diagnosis'] = str(results['diagnosis'])
+            results['escalation'] = str(results['escalation'])
+            results["status"] = item['status']
+
     return jsonify(results)
 
 @app.route('/check_incident', methods=['POST'])
