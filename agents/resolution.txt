@@ -1,0 +1,10 @@
+*** Issue Resolver — What it does ***
+
+ - Input: Takes a diagnosis result dictionary containing root_cause and next_steps.
+ - Combines the root cause and next steps into one text string (lowercased).
+ - Checks for specific keywords (like "restart", "config", "rollback", etc.) in the combined text using exact word matching.
+ - Returns a predefined resolution message matching the first found keyword.
+ - If no keywords match, it returns a default message asking for manual intervention.
+
+ - Why useful?
+     - Automates initial resolution suggestions based on diagnosis keywords, speeding up incident handling and guiding next steps.

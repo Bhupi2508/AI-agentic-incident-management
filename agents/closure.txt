@@ -1,0 +1,13 @@
+*** Closure Validation — What It Does ***
+ - This function checks if an incident is truly resolved by analyzing:
+
+     - User feedback phrases indicating if the issue is fixed or still there.
+     - System logs showing clean or error-filled system status.
+
+ - How it works
+     - Looks for positive patterns in feedback or logs (like "issue fixed", "no errors").
+     - Looks for negative patterns suggesting ongoing problems (like "still seeing error", "crash detected").
+     - Returns a clear message whether closure is validated, rejected, or needs more investigation.
+
+ - Why it matters
+     - It helps automate confirmation that a problem is resolved before closing a ticket or escalating further.

@@ -1,0 +1,16 @@
+*** Email Sending Module — What It Does ***
+
+ - This script automatically sends incident update emails using AWS SES.
+     - It loads settings like AWS region and email addresses from environment variables.
+     - Takes these inputs:
+         - Incident summary
+         - Escalation message (e.g., "Escalated to Level 2 Support")
+         - Resolution message
+
+     - Builds a clear, emoji-friendly email body.
+     - Sends the email via AWS SES to the right recipients.
+     - Prints success or error info for monitoring.
+
+How it fits in your system
+ - After diagnosing and deciding the next steps for an incident, this module notifies stakeholders instantly by emailing the incident details and what actions were taken.
+ - AWS SES handles the actual email delivery reliably, so your system just calls this function without worrying about email mechanics.

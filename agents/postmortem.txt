@@ -1,0 +1,16 @@
+*** Postmortem Generator — What it does ***
+
+ - Inputs: Takes incident details — incident description, diagnosis, resolution, and escalation info.
+     - Builds a prompt combining all these details into a request for a 5-line summary covering:
+         - Root cause
+         - Resolution steps
+         - Lessons learned
+         - Prevention tips
+         - Final status
+
+    - Calls AWS Bedrock model API with this prompt to generate a concise postmortem.
+    - Returns the generated text summary.
+    - Handles errors gracefully if API call fails.
+
+ - Why useful?
+     - Automates creation of incident postmortems, saving time and standardizing reports for quick understanding and documentation.

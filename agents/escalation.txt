@@ -1,0 +1,18 @@
+*** Escalation Module — What It Does ***
+
+ - This module decides who to escalate an incident to based on its severity.
+     - Takes the incident severity (e.g., Blocker, Critical, High).
+     - Maps severity levels to escalation actions like:
+         - Blocker → Platform Commander + Alert all stakeholders
+         - Critical → SME (Subject Matter Expert)
+         - High → Level 3 Support
+     - Determines if escalation is needed or if automation can handle it.
+     - Returns the escalation message and a flag indicating whether to escalate.
+
+How it fits in your system
+ - After diagnosing severity, your app uses this module to route incidents to the right team or automate responses, ensuring quick action from the correct people.
+
+ - Next steps for improvement
+     - Integrate with notification systems (Slack, PagerDuty).
+     - Add more granular escalation levels.
+     - Customize escalation rules per team or incident type.

@@ -1,0 +1,29 @@
+This Flask-based microservice orchestrates a sequence of AI agents to handle incident lifecycle stages.
+
+Each agent performs a specific task in the incident resolution pipeline:
+1. DIAGNOSIS     - Analyzes the incident description using a Bedrock-powered model to identify the issue.
+2. ESCALATION    - Determines severity from the diagnosis and recommends whether escalation is needed.
+3. RESOLUTION    - Suggests a possible resolution based on the diagnosis.
+4. COMMUNICATION - (Mocked) Sends out email communication with escalation and resolution details.
+5. CLOSURE       - Validates incident closure using optional user/system feedback.
+6. POSTMORTEM    - Generates a postmortem summary combining diagnosis, resolution, and escalation.
+
+Workflow:
+- Fetch incident status from DynamoDB.
+- Resume from the last saved agent (status-based checkpoint).
+- Update DynamoDB with results after each step.
+- If the status is already 'POSTMORTEM', short-circuit and return saved values directly.
+
+Config:
+- AWS_DEFAULT_REGION=us-west-2
+- AWS_ACCESS_KEY_ID
+- AWS_SECRET_ACCESS_KEY=
+- AWS_SESSION_TOKEN=
+- BEDROCK_REGION=us-west-2
+- BEDROCK_MODEL_ID=
+- EMAIL_SEND_TO=
+- EMAIL_FROM=
+- TABLE_NAME=aiIncidentManagement  ---- Not Required
+- LATEST_TABLE_NAME=AI_Incident_Management
+
+Note: Each agent handles its own failure gracefully. If a stage fails, error information is stored and the process continues.

@@ -1,0 +1,17 @@
+*** Diagnosis Module — What It Does ***
+
+ - This module analyzes an incident description using an AI model and returns:
+     - The root cause of the incident.
+     - Recommended next steps to fix it.
+     - A confidence score estimating how sure the AI is.
+     - The severity level of the incident (like High, Medium).
+     - Whether human intervention is needed based on severity and confidence.
+
+ - How it fits in your system
+     - You send incident details to this module, it calls the AI model to get a structured diagnosis, then uses rules to evaluate how serious the issue is and if a human needs to step in.
+
+ - Next steps for improvement
+     - Enhance confidence scoring with more AI insights.
+     - Add more detailed severity rules.
+     - Support more complex incident descriptions.
+
