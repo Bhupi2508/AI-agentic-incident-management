@@ -118,6 +118,24 @@
       cursor: not-allowed;
     }
 
+    button#submitBtnView {
+      margin-top: 14px;
+      padding: 14px 26px;
+      font-weight: 700;
+      background-color: #00bcd4;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      width: 100%;
+    }
+
+    button#submitBtnView:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+    }
+
     .error {
       color: #ff6b6b;
       font-size: 14px;
@@ -190,6 +208,7 @@
     <div id="descError" class="error"></div>
 
     <button id="submitBtn" disabled>Run Agents</button>
+    <button id="submitBtnView" disabled>View Postmortem Report</button>
     <div id="loadingSpinner" style="display:none; text-align:center; margin-top: 20px;">
       <img src="https://i.gifer.com/ZZ5H.gif" alt="Loading..." width="50" />
     </div>
@@ -201,6 +220,7 @@
     const incidentDescInput = document.getElementById('incidentDesc');
     const checkBtn = document.getElementById('checkBtn');
     const submitBtn = document.getElementById('submitBtn');
+    const submitBtnView = document.getElementById('submitBtnView');
     const idError = document.getElementById('idError');
     const descError = document.getElementById('descError');
     const availabilityMsg = document.getElementById('availabilityMsg');
@@ -214,6 +234,7 @@
       checkBtn.disabled = true;
       availabilityMsg.textContent = '';
       submitBtn.disabled = true;
+      submitBtnView.disabled = true;
       incidentDescInput.disabled = true;
       incidentDescInput.value = '';
 
@@ -254,13 +275,15 @@
           availabilityMsg.textContent = '✅ Incident already exists, please proceed.';
           availabilityMsg.className = 'success';
           incidentDescInput.disabled = true;
-          submitBtn.disabled = false;
+          submitBtn.disabled = true;
+          submitBtnView.disabled = false;
         } else {
           isExistingIncident = false;
           availabilityMsg.textContent = 'Incident not found. Please enter description to proceed';
           availabilityMsg.className = 'warning';
           incidentDescInput.disabled = false;
-          submitBtn.disabled = true;
+          submitBtn.disabled = false;
+          submitBtnView.disabled = true;
         }
       } catch (err) {
         availabilityMsg.textContent = '❌ Error checking incident';
@@ -279,6 +302,66 @@
     });
 
     submitBtn.addEventListener('click', async () => {
+      // Clear any previous errors
+      descError.textContent = '';
+
+      if (!isExistingIncident && incidentDescInput.value.trim().length <= 8) {
+        descError.textContent = 'Description must be at least 8 characters.';
+        return;
+      }
+
+      const payload = {
+        incidentId: incidentIdInput.value.trim(),
+        incidentDesc: isExistingIncident ? null : incidentDescInput.value.trim()
+      };
+
+      // Show spinner
+      loadingSpinner.style.display = 'block';
+
+      try {
+        const response = await fetch('/run_agents', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        let resultsDiv = document.getElementById('resultsDiv');
+        if (!resultsDiv) {
+          resultsDiv = document.createElement('div');
+          resultsDiv.id = 'resultsDiv';
+          document.querySelector('.container').appendChild(resultsDiv);
+        }
+
+        // Build table HTML
+        let tableHTML = '<table><thead><tr><th>Agent</th><th>Response</th></tr></thead><tbody>';
+
+        // Assuming data is an object where keys = agents, values = responses
+        for (const key in data) {
+          const safeResponse = data[key] ? data[key].toString().replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+          tableHTML += `<tr><td>${key}</td><td>${safeResponse}</td></tr>`;
+        }
+
+        tableHTML += '</tbody></table>';
+
+        resultsDiv.innerHTML = tableHTML;
+
+      } catch (err) {
+        let resultsDiv = document.getElementById('resultsDiv');
+        if (!resultsDiv) {
+          resultsDiv = document.createElement('div');
+          resultsDiv.id = 'resultsDiv';
+          document.querySelector('.container').appendChild(resultsDiv);
+        }
+        resultsDiv.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+      } finally {
+        // Hide spinner
+        loadingSpinner.style.display = 'none';
+      }
+    });
+
+    submitBtnView.addEventListener('click', async () => {
       // Clear any previous errors
       descError.textContent = '';
 
