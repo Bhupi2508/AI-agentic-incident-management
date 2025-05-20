@@ -27,40 +27,32 @@ Built with AWS Lambda and Step Functions, this serverless solution aims to reduc
 
 ## Project Structure
 
-project-root/
-├── orchestrator.js # Step Functions orchestration logic
-├── lambdas/ # AWS Lambda functions
-│ ├── diagnosis.js
-│ ├── escalation.js
-│ ├── resolution.js
-│ ├── communication.js
-│ ├── closure.js
-│ └── postReview.js
-├── input/
-│ └── sample-incident.json # Sample input JSON for testing
-├── output/
-│ └── final-report.json # Example final output report
-
 /project-root
 │
-├── /shared/               # Common code
-│   ├── utils.py
-│   ├── email_templates/
-│   └── ...
-│
-├── /agent1/
-│   ├── handler.py         # Lambda handler for agent1
-│   ├── requirements.txt
-│   └── ...
-│
-├── /agent2/
-│   ├── handler.py
-│   └── ...
-│
-├── /agent3/
-│   └── ...
-│
-└── deploy.sh              # Optional deploy script
+├── /utils/               # Common code
+│   ├── dynamodb.py
+│   ├── logger.py
+│   └── setup_dynamodb_table.py # db create table n all
+├── /agents/
+│ ├── diagnosis.js
+│ ├── diagnosis.txt
+│ ├── escalation.js
+│ ├── escalation.txt
+│ ├── resolution.js
+│ ├── resolution.txt
+│ ├── communication.js
+│ ├── communication.txt
+│ ├── closure.js
+│ ├── closure.txt
+│ └── postReview.js
+│ └── postReview.txt
+└── .env
+└── app.py    # main file  
+└── app.txt    
+└── architecture.txt  
+└── README.md
+└── .gitignore   
+├── index.html
 
 
 ## Getting Started

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, render_template, request, jsonify
 from agents.diagnosis import diagnose_with_bedrock
 from agents.escalation import escalate, extract_severity_and_respond
 from agents.resolution import resolve_issue
@@ -12,7 +12,7 @@ import boto3
 import os
 import ast
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='.')
 
 # Environment variables for email recipient and DynamoDB table names
 EMAIL_RECIPIENT = os.getenv("EMAIL_SEND_TO")
