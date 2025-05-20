@@ -1,0 +1,24 @@
+User / Monitoring System
+       │
+       ▼
+Incident Reported ──> Severity & Escalation Decision
+       │                      │
+       │                      ▼
+       │             Automated Resolution Suggestion
+       │                      │
+       │                      ▼
+       │             Send Notification (Email / Slack)
+       │                      │
+       ▼                      ▼
+Closure Validation <─ User Feedback + System Logs
+       │
+       ▼
+Is closure validated?
+   ├─ Yes ──> Generate Postmortem Summary
+   └─ No ──> Further Investigation or Manual Intervention
+       │
+       ▼
+Data Stored & Monitored in DB
+       │
+       ▼
+Cycle repeats as needed for updates or re-escalation
