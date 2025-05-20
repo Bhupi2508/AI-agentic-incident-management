@@ -128,6 +128,8 @@ if __name__ == "__main__":
         resolution="Increased heap memory limit",
         postmortem="Added memory monitoring",
         closure="Ticket closed after fix",
+        created_at=datetime.now(timezone.utc).isoformat(),
+        updated_at=datetime.now(timezone.utc).isoformat(),
         freefield1="",
         freefield2="",
         freefield3=""

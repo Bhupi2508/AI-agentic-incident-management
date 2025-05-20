@@ -92,8 +92,8 @@ def update_incident_in_dynamodb(incident_id, update_fields, TABLE_NAME):
         expression_attribute_values[placeholder] = value
 
     # Add updatedAt timestamp
-    update_expression_parts.append("updatedAt = :updated")
-    expression_attribute_values[":updated"] = datetime.now(timezone.utc).isoformat()
+    update_expression_parts.append("updated_at = :updated_at")
+    expression_attribute_values[":updated_at"] = datetime.now(timezone.utc).isoformat()
 
     update_expression = "SET " + ", ".join(update_expression_parts)
 
@@ -109,14 +109,15 @@ def update_incident_in_dynamodb(incident_id, update_fields, TABLE_NAME):
         print(f"❌ Failed to update incident {incident_id}:", e)
 
 
-def fetch_dynamodb_items(table_name):
+def fetch_dynamodb_items(table_name, incident_id):
     dynamodb = boto3.resource('dynamodb', region_name=AWS_DEFAULT_REGION)
     table = dynamodb.Table(table_name)
 
     try:
-        response = table.scan()
-        print(f"DynamoDB RESPONSE::::::::::::::::: {response}")
-        return response.get('Items', [])
+        response = table.get_item(Key={'incidentId': incident_id})
+        data = response.get('Items')
+        print("::::::::::::: ", data)
+        return data
     except Exception as e:
         print(f"Error fetching data from DynamoDB: {e}")
         return []

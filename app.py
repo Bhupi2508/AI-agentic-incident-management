@@ -7,7 +7,7 @@ from agents.closure import validate_closure
 from agents.postmortem import generate_postmortem
 from datetime import datetime, timezone
 from utils.logger import log
-from utils.dynamodb import update_incident_in_dynamodb
+from utils.dynamodb import fetch_dynamodb_items, update_incident_in_dynamodb
 import boto3
 import os
 from datetime import datetime
@@ -34,13 +34,15 @@ def run_agents():
     incident_id = data.get('incidentId', '')
     incident_desc = data.get('incidentDesc', '')
 
+    log("incident_id :::: ", incident_id)
+    log("incident_desc :::: ", incident_desc)
+
     if not incident_id:
         return jsonify({'error': 'incidentId is required'}), 400
 
     # Fetch incident data from DynamoDB to get current status and any saved info
     try:
-        response = table.get_item(Key={'incidentId': incident_id})
-        item = response.get('Item')
+        item = fetch_dynamodb_items(table,incident_id)
     except Exception as e:
         return jsonify({'error': f"Error fetching incident from DB: {str(e)}"}), 500
 
@@ -68,7 +70,7 @@ def run_agents():
     results = {}
     update_attrs = {
         'incidentId': incident_id,
-        'updateTime': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
+        'updated_at': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
         'priority': item.get('priority') if item else 'normal'  # you can adjust priority logic
     }
 
@@ -77,12 +79,15 @@ def run_agents():
         if start_index <= 0:
             log(">>>>>>>> Running Diagnosis Agent >>>>>>>>")
             diagnosis = diagnose_with_bedrock(incident_desc)
+            print("+++++++++++++++ Diagnosis data :::::::: ", diagnosis)
             results['diagnosis'] = diagnosis['diagnosis']
+            results['status'] = "DIAGNOSIS"
             update_attrs['diagnosis'] = diagnosis
             update_attrs['status'] = "DIAGNOSIS"
-            update_attrs['updateTime'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
+            update_attrs['updated_at'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
         else:
             results['diagnosis'] = item.get('diagnosis') if item else ''
+            results['status'] = "DIAGNOSIS"
     except Exception as e:
         results['diagnosis'] = f"Diagnosis failed: {str(e)}"
 
@@ -90,17 +95,17 @@ def run_agents():
     try:
         if start_index <= 1:
             log(">>>>>>>> Running Escalation Agent >>>>>>>>")
-            if incident_desc is None:
-                diagnosis = item.get('diagnosis') if item else ''
-            else:
-                escalation_input = results.get('diagnosis', '') or (item.get('diagnosis') if item else '')
+            escalation_input = results.get('diagnosis', '') or (item.get('diagnosis') if item else '')
             escalation = extract_severity_and_respond(escalation_input)
+            print("+++++++++++++++ Escalation data :::::::: ", escalation)
             results['escalation'] = escalation
+            results['status'] = "ESCALATION"
             update_attrs['escalation'] = escalation
             update_attrs['status'] = "ESCALATION"
-            update_attrs['updateTime'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
+            update_attrs['updated_at'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
         else:
             results['escalation'] = item.get('escalation') if item else ''
+            results['status'] = "ESCALATION"
     except Exception as e:
         results['escalation'] = f"Escalation failed: {str(e)}"
 
@@ -108,17 +113,17 @@ def run_agents():
     try:
         if start_index <= 2:
             log(">>>>>>>> Running Resolution Agent >>>>>>>>")
-            if incident_desc is None:
-                diagnosis = item.get('diagnosis') if item else ''
-            else:
-                resolution_input = results.get('diagnosis', '') or (item.get('diagnosis') if item else '')
+            resolution_input = results.get('diagnosis', '') or (item.get('diagnosis') if item else '')
             resolution = resolve_issue(resolution_input)
+            print("+++++++++++++++ resolution data :::::::: ", resolution)
             results['resolution'] = resolution
+            results['status'] = "RESOLUTION"
             update_attrs['resolution'] = resolution
             update_attrs['status'] = "RESOLUTION"
-            update_attrs['updateTime'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
+            update_attrs['updated_at'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
         else:
             results['resolution'] = item.get('resolution') if item else ''
+            results['status'] = "RESOLUTION"
     except Exception as e:
         results['resolution'] = f"Resolution failed: {str(e)}"
 
@@ -126,17 +131,19 @@ def run_agents():
     try:
         if start_index <= 3:
             log(">>>>>>>> Running Communication Agent >>>>>>>>")
-            if incident_desc is None:
-                diagnosis = item.get('diagnosis') if item else ''
-                escalation = item.get('escalation') if item else ''
-                resolution = item.get('resolution') if item else ''
+            diagnosis = results.get('diagnosis', '') or (item.get('diagnosis') if item else '')
+            escalation = results.get('escalation', '') or (item.get('escalation') if item else '')
+            resolution = results.get('resolution', '') or (item.get('resolution') if item else '')
             # send_test_email(incident_desc, escalation, results.get('resolution', ''), EMAIL_RECIPIENT)
+            print("+++++++++++++++ COMMUNICATION data :::::::: ")
             results['communication'] = "Email sent successfully."
+            results['status'] = "COMMUNICATION"
             update_attrs['communication'] = results['communication']
             update_attrs['status'] = "COMMUNICATION"
-            update_attrs['updateTime'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
+            update_attrs['updated_at'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
         else:
             results['communication'] = item.get('communication') if item else ''
+            results['status'] = "COMMUNICATION"
     except Exception as e:
         results['communication'] = f"Communication Error: {str(e)}"
 
@@ -151,84 +158,51 @@ def run_agents():
             system_logs = data.get('systemLogs', 'No anomalies detected in logs.')
 
             closure_status = validate_closure(user_feedback, system_logs)
+            print("+++++++++++++++ CLOSURE data :::::::: ", closure_status)
             results['closure'] = closure_status
+            results['status'] = "CLOSURE"
             update_attrs['closure'] = closure_status
             update_attrs['status'] = "CLOSURE"
-            update_attrs['updateTime'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
+            update_attrs['updated_at'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
         else:
             results['closure'] = item.get('closure') if item else ''
+            results['status'] = "CLOSURE"
     except Exception as e:
         results['closure'] = f"Closure validation failed: {str(e)}"
 
     # POSTMORTEM agent
     try:
         if start_index <= 5:
-            if incident_desc is None:
-                incident_desc = item.get('incident_desc') if item else ''
-                diagnosis = item.get('diagnosis') if item else ''
-                resolution = item.get('resolution') if item else ''
-                escalation = item.get('escalation') if item else ''
-
             log(">>>>>>>> Running Post-Mortem Agent >>>>>>>>")
-            print('-----00', incident_desc, diagnosis, resolution)
-            postmortem = generate_postmortem(incident_desc, results.get('diagnosis', diagnosis), results.get('resolution', resolution), escalation)
+            diagnosis = results.get('diagnosis', '') or (item.get('diagnosis') if item else '')
+            escalation = results.get('escalation', '') or (item.get('escalation') if item else '')
+            resolution = results.get('resolution', '') or (item.get('resolution') if item else '')
+
+            postmortem = generate_postmortem(item.get('description') if item else '', results.get('diagnosis', diagnosis), results.get('resolution', resolution), escalation)
+            print("+++++++++++++++ Post-Mortem :::::::: ", postmortem)
             results['postmortem'] = postmortem
+            results['status'] = "POSTMORTEM"
             update_attrs['postmortem'] = postmortem
             update_attrs['status'] = "POSTMORTEM"
-            update_attrs['updateTime'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
+            update_attrs['updated_at'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
         else:
             results['postmortem'] = item.get('postmortem') if item else ''
-    except Exception as e:
-        results['postmortem'] = f"Post-Mortem Generation failed: {str(e)}"
+            results['status'] = "CLOSURE"
 
-
-    # Push all updates to DynamoDB at once
-    try:
-        if incident_desc is None:
-            incident_desc = item.get('incident_desc') if item else ''
-            diagnosis = item.get('diagnosis') if item else ''
-            resolution = item.get('resolution') if item else ''
-            escalation = item.get('escalation') if item else ''
-            closure = item.get('closure') if item else ''
-            results['closure'] = item['closure']
-            results['resolution'] = resolution
-            results['escalation'] = escalation
-            results['diagnosis'] = diagnosis
-            update_attrs['diagnosis'] = diagnosis
-            update_attrs['resolution'] = resolution
-            update_attrs['escalation'] = escalation
-            update_attrs['closure'] = closure
-
-
-        print("00000000000 ", )
-        # Note: update_attrs already contains incidentId, status, updateTime, and all agent outputs
-        update_attrs['description'] = incident_desc
-        update_incident_in_dynamodb(incident_id, update_attrs, LATEST_TABLE_NAME)
-        log(f"Incident {incident_id} updated with status {update_attrs.get('status')} in DynamoDB")
-    except Exception as e:
-        log(f"Error while pushing incident data to DynamoDB: {str(e)}")
-
-        # Fetch incident data from DynamoDB to get current status
+        update_attrs['description'] = incident_desc if incident_desc is not None else (item.get('description') if item else '')
+        update_attrs['created_at'] = results.get('created_at', '') or (item.get('created_at') if item else datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'))
         try:
-            response = table.get_item(Key={'incidentId': incident_id})
-            item = response.get('Item')
-            print("222222222222 ", item)
-        except Exception as e:
-            return jsonify({'error': f"Error fetching incident from DB: {str(e)}"}), 500
-
-        if incident_desc is None:
-            results['status'] = item['status']
-            results['closure'] = item['closure']
-            results['postmortem'] = item['postmortem']
-            results['resolution'] = item['resolution']
-            results['escalation'] = item['escalation']
-            results['diagnosis'] = item['diagnosis']['diagnosis']
-        else:
+            update_incident_in_dynamodb(incident_id, update_attrs, LATEST_TABLE_NAME)
+            log(f"Incident {incident_id} updated with status {update_attrs.get('status')} in DynamoDB")
             results['diagnosis'] = str(results['diagnosis'])
             results['escalation'] = str(results['escalation'])
-            results["status"] = item['status']
 
-    return jsonify(results)
+        except Exception as e:
+            log(f"❌ Error while pushing incident data to DynamoDB: {str(e)}")
+
+        return jsonify(results)
+    except Exception as e:
+        results['postmortem'] = f"Post-Mortem Generation failed: {str(e)}"
 
 @app.route('/check_incident', methods=['POST'])
 def check_incident():
