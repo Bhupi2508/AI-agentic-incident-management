@@ -169,14 +169,21 @@ def run_agents():
     try:
         # Note: update_attrs already contains incidentId, status, updateTime, and all agent outputs
         update_attrs['description'] = incident_desc
-        data = update_incident_in_dynamodb(incident_id, update_attrs, LATEST_TABLE_NAME)
+        update_incident_in_dynamodb(incident_id, update_attrs, LATEST_TABLE_NAME)
         log(f"Incident {incident_id} updated with status {update_attrs.get('status')} in DynamoDB")
     except Exception as e:
         log(f"Error while pushing incident data to DynamoDB: {str(e)}")
 
     results['diagnosis'] = str(results['diagnosis'])
     results['escalation'] = str(results['escalation'])
-    # results["status"] = ""
+
+    # Fetch incident data from DynamoDB to get current status
+    try:
+        response = table.get_item(Key={'incidentId': incident_id})
+        item = response.get('Item')
+    except Exception as e:
+        return jsonify({'error': f"Error fetching incident from DB: {str(e)}"}), 500
+    results["status"] = item['status']
     return jsonify(results)
 
 @app.route('/check_incident', methods=['POST'])
