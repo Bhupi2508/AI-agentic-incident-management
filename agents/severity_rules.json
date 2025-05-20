@@ -1,50 +1,82 @@
 [
     {
-        "severity": "Blocker",
         "conditions": [
-            "system is down",
-            "login failure",
-            "authentication failure",
-            "database outage",
-            "affects all users",
-            "no workaround"
-        ]
-    },
-    {
-        "severity": "Critical",
-        "conditions": [
-            "payment fails",
-            "core business flow fails",
             "data loss",
-            "data corruption",
-            "major api is unresponsive",
-            "affects large user group"
-        ]
+            "system crash",
+            "server down",
+            "complete failure",
+            "unrecoverable",
+            "permanent loss",
+            "database corruption",
+            "database down",
+            "security breach",
+            "payment failure",
+            "unable to login",
+            "authentication failed"
+        ],
+        "severity": "Blocker"
     },
     {
-        "severity": "High",
         "conditions": [
-            "services degraded",
-            "services failing",
-            "affects some users",
-            "workaround exists"
-        ]
+            "critical",
+            "production issue",
+            "prod down",
+            "latency spike",
+            "memory leak",
+            "cpu 100%",
+            "process killed",
+            "deadlock",
+            "high severity",
+            "infinite loop",
+            "timeout error"
+        ],
+        "severity": "Critical"
     },
     {
-        "severity": "Medium",
         "conditions": [
-            "internal tool issue",
-            "performance slowness",
-            "niche case failure"
-        ]
+            "timeout",
+            "504",
+            "gateway timeout",
+            "system not responding",
+            "connection refused",
+            "failed dependency",
+            "retry limit reached",
+            "disk full",
+            "unavailable",
+            "service unavailable"
+        ],
+        "severity": "High"
     },
     {
-        "severity": "Low",
         "conditions": [
-            "ui glitch",
-            "cosmetic bug",
-            "logging issue",
-            "no business impact"
-        ]
+            "slow",
+            "latency",
+            "degraded",
+            "not loading properly",
+            "cache not working",
+            "delay in response",
+            "partial outage",
+            "memory warning",
+            "temporary error",
+            "inconsistent results",
+            "intermittent issue"
+        ],
+        "severity": "Medium"
+    },
+    {
+        "conditions": [
+            "minor",
+            "cosmetic",
+            "typo",
+            "spelling mistake",
+            "alignment issue",
+            "UI glitch",
+            "feedback",
+            "low impact",
+            "suggestion",
+            "warning only",
+            "non-blocking"
+        ],
+        "severity": "Low"
     }
 ]

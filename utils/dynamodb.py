@@ -105,9 +105,7 @@ def update_incident_in_dynamodb(incident_id, update_fields, TABLE_NAME):
 def fetch_dynamodb_item(table, incident_id):
     try:
         response = table.get_item(Key={'incidentId': incident_id})
-        print(":::11:::::::::: ", response)
         item = response.get('Item')
-        print("::::::::::::: ", item)
         return item
     except Exception as e:
         print(f"Error fetching data from DynamoDB: {e}")

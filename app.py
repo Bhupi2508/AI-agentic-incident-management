@@ -85,14 +85,17 @@ def run_agents():
     # DIAGNOSIS agent
     try:
         if start_index <= 0:
-            log(">>>>>>>> Running Diagnosis Agent >>>>>>>>")
+            log("Running Diagnosis Agent Start #################################################")
             diagnosis = diagnose_with_bedrock(incident_desc)
             print("+++++++++++++++ Diagnosis data :::::::: ", diagnosis)
             results['diagnosis'] = diagnosis['diagnosis']
+            results['severity'] = diagnosis['severity']
+            results['needs_human_intervention'] = diagnosis['needs_human_intervention']
             results['status'] = "DIAGNOSIS"
             update_attrs['diagnosis'] = diagnosis
             update_attrs['status'] = "DIAGNOSIS"
             update_attrs['updated_at'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
+            log("Running Diagnosis Agent End #################################################")
         else:
             results['diagnosis'] = item.get('diagnosis') if item else ''
             results['status'] = "DIAGNOSIS"
@@ -102,15 +105,17 @@ def run_agents():
     # ESCALATION agent
     try:
         if start_index <= 1:
-            log(">>>>>>>> Running Escalation Agent >>>>>>>>")
-            escalation_input = results.get('diagnosis', '') or (item.get('diagnosis') if item else '')
-            escalation = extract_severity_and_respond(escalation_input)
+            log("Running Escalation Agent Start #################################################")
+            escalation_input = results.get('severity', '') or results.get('severity', '') or (item.get('diagnosis') if item else '')
+            needs_human_intervention_input = results.get('needs_human_intervention', '') or results.get('needs_human_intervention', '') or ''
+            escalation = extract_severity_and_respond(escalation_input, needs_human_intervention_input)
             print("+++++++++++++++ Escalation data :::::::: ", escalation)
             results['escalation'] = escalation
             results['status'] = "ESCALATION"
             update_attrs['escalation'] = escalation
             update_attrs['status'] = "ESCALATION"
             update_attrs['updated_at'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
+            log("Running Escalation Agent End #################################################")
         else:
             results['escalation'] = item.get('escalation') if item else ''
             results['status'] = "ESCALATION"
@@ -120,7 +125,7 @@ def run_agents():
     # RESOLUTION agent
     try:
         if start_index <= 2:
-            log(">>>>>>>> Running Resolution Agent >>>>>>>>")
+            log("Running Resolution Agent Start #################################################")
             resolution_input = results.get('diagnosis', '') or (item.get('diagnosis') if item else '')
             resolution = resolve_issue(resolution_input)
             print("+++++++++++++++ resolution data :::::::: ", resolution)
@@ -129,6 +134,7 @@ def run_agents():
             update_attrs['resolution'] = resolution
             update_attrs['status'] = "RESOLUTION"
             update_attrs['updated_at'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
+            log("Running Resolution Agent End #################################################")
         else:
             results['resolution'] = item.get('resolution') if item else ''
             results['status'] = "RESOLUTION"
@@ -138,7 +144,7 @@ def run_agents():
     # COMMUNICATION agent
     try:
         if start_index <= 3:
-            log(">>>>>>>> Running Communication Agent >>>>>>>>")
+            log("Running Communication Agent Start #################################################")
             diagnosis = results.get('diagnosis', '') or (item.get('diagnosis') if item else '')
             escalation = results.get('escalation', '') or (item.get('escalation') if item else '')
             resolution = results.get('resolution', '') or (item.get('resolution') if item else '')
@@ -149,6 +155,7 @@ def run_agents():
             update_attrs['communication'] = results['communication']
             update_attrs['status'] = "COMMUNICATION"
             update_attrs['updated_at'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
+            log("Running Communication Agent End #################################################")
         else:
             results['communication'] = item.get('communication') if item else ''
             results['status'] = "COMMUNICATION"
@@ -159,7 +166,7 @@ def run_agents():
     # CLOSURE agent
     try:
         if start_index <= 4:
-            log(">>>>>>>> Running Closure Agent >>>>>>>>")
+            log("Running Closure Agent Start #################################################")
 
             # Add dummy or fetched values if user_feedback/system_logs not provided
             user_feedback = data.get('userFeedback', 'Positive feedback received.')
@@ -172,6 +179,7 @@ def run_agents():
             update_attrs['closure'] = closure_status
             update_attrs['status'] = "CLOSURE"
             update_attrs['updated_at'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
+            log("Running Closure Agent End #################################################")
         else:
             results['closure'] = item.get('closure') if item else ''
             results['status'] = "CLOSURE"
@@ -181,7 +189,7 @@ def run_agents():
     # POSTMORTEM agent
     try:
         if start_index <= 5:
-            log(">>>>>>>> Running Post-Mortem Agent >>>>>>>>")
+            log("Running Post-Mortem Start #################################################")
             diagnosis = results.get('diagnosis', '') or (item.get('diagnosis') if item else '')
             escalation = results.get('escalation', '') or (item.get('escalation') if item else '')
             resolution = results.get('resolution', '') or (item.get('resolution') if item else '')
@@ -193,6 +201,7 @@ def run_agents():
             update_attrs['postmortem'] = postmortem
             update_attrs['status'] = "POSTMORTEM"
             update_attrs['updated_at'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
+            log("Running Post-Mortem End #################################################")
         else:
             results['postmortem'] = item.get('postmortem') if item else ''
             results['status'] = "CLOSURE"

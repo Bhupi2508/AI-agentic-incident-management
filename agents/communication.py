@@ -12,15 +12,20 @@ EMAIL_FROM = os.getenv("EMAIL_FROM")
 def send_test_email(incident_summary, escalation_message, resolution_message, incident_Id, email_recipient=None):
     print(":::::: Print :::::: ", incident_summary, escalation_message, resolution_message, email_recipient, incident_Id)
 
+    should_escalate = escalation_message.get('should_escalate', False)
+
     # Check escalation flag before proceeding
-    if not getattr(escalation_message, "should_escalate", False):
+    if not should_escalate:
         print(f"ℹ️ No escalation required for Incident #{incident_Id}. Email will not be sent.")
         return f"ℹ️ No escalation required for Incident #{incident_Id}. Email not sent."
-
+    
+    print("escalation_message, Whether should escalate :::: ", escalation_message['should_escalate'])
     ses_client = boto3.client('ses', region_name=AWS_DEFAULT_REGION)
     to_email = email_recipient or EMAIL_SEND_TO
 
     subject = f"[JIRA][AUTO-ALERT] 🚨 Incident #{incident_Id} – Escalation & Resolution Summary"
+    escalation_message_data = escalation_message.get('severity', "Medium")
+    escalation_message_action = escalation_message.get('escalation_action', "")
 
     body_html = f"""
 <html>
@@ -76,7 +81,7 @@ def send_test_email(incident_summary, escalation_message, resolution_message, in
     </div>
 
     <div class="jira-section">
-      <span class="jira-label">Priority:</span> {escalation_message.severity}
+      <span class="jira-label">Priority:</span> {escalation_message_data}
     </div>
 
     <div class="jira-section">
@@ -84,7 +89,7 @@ def send_test_email(incident_summary, escalation_message, resolution_message, in
     </div>
 
     <div class="jira-section">
-      <span class="jira-label">Escalation Notes:</span> {escalation_message.escalation_action}
+      <span class="jira-label">Escalation Notes:</span> {escalation_message_action}
     </div>
 
     <div class="jira-section">

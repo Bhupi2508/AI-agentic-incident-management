@@ -1,9 +1,10 @@
 import re
 
 def resolve_issue(diagnosis_result):
-    root_cause = diagnosis_result.get("diagnosis", {}).get("root_cause", "").lower()
-    next_steps = diagnosis_result.get("diagnosis", {}).get("next_steps", "").lower()
+    root_cause = diagnosis_result.get("root_cause", "").lower()
+    next_steps = diagnosis_result.get("next_steps", "").lower()
     combined_text = root_cause + " " + next_steps
+    print("combined_text for resolution :::: ", combined_text)
  
     resolution_map = {
         "restart": "Recommended to restart the service based on diagnosis.",

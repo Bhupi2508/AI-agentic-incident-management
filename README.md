@@ -41,6 +41,28 @@ project-root/
 ├── output/
 │ └── final-report.json # Example final output report
 
+/project-root
+│
+├── /shared/               # Common code
+│   ├── utils.py
+│   ├── email_templates/
+│   └── ...
+│
+├── /agent1/
+│   ├── handler.py         # Lambda handler for agent1
+│   ├── requirements.txt
+│   └── ...
+│
+├── /agent2/
+│   ├── handler.py
+│   └── ...
+│
+├── /agent3/
+│   └── ...
+│
+└── deploy.sh              # Optional deploy script
+
+
 ## Getting Started
 
 1. Deploy each Lambda function on AWS Lambda.  
