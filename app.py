@@ -7,7 +7,7 @@ from agents.closure import validate_closure
 from agents.postmortem import generate_postmortem
 from datetime import datetime, timezone
 from utils.logger import log
-from utils.dynamodb import fetch_dynamodb_items, push_incident_to_dynamodb
+from utils.dynamodb import update_incident_in_dynamodb
 import boto3
 import os
 from datetime import datetime
@@ -131,47 +131,50 @@ def run_agents():
     except Exception as e:
         results['communication'] = f"Communication Error: {str(e)}"
 
-    # Simulated user feedback and system logs for Closure agent
-    user_feedback = "The issue fixed after service restart."
-    system_logs = "No errors reported in last 30 minutes."
 
-#     # CLOSURE agent
-#     try:
-#         if start_index <= 4:
-#             log("Running Closure Agent")
-#             closure_status = validate_closure(user_feedback, system_logs)
-#             results['closure'] = closure_status
-#             update_attrs['closure'] = closure_status
-#             update_attrs['status'] = "CLOSURE"
-#             update_attrs['updateTime'] = datetime.utcnow().isoformat()
-#         else:
-#             results['closure'] = item.get('closure') if item else ''
-#     except Exception as e:
-#         results['closure'] = f"Closure validation failed: {str(e)}"
+    # CLOSURE agent
+    try:
+        if start_index <= 4:
+            log("************ Running Closure Agent ************")
 
-#     # POSTMORTEM agent
-#     try:
-#         if start_index <= 5:
-#             log("Running Post-Mortem Agent")
-#             postmortem = generate_postmortem(incident_desc, results.get('diagnosis', ''), results.get('resolution', ''))
-#             results['postmortem'] = postmortem
-#             update_attrs['postmortem'] = postmortem
-#             update_attrs['status'] = "POSTMORTEM"
-#             update_attrs['updateTime'] = datetime.utcnow().isoformat()
-#         else:
-#             results['postmortem'] = item.get('postmortem') if item else ''
-#     except Exception as e:
-#         results['postmortem'] = f"Post-Mortem Generation failed: {str(e)}"
+            # Add dummy or fetched values if user_feedback/system_logs not provided
+            user_feedback = data.get('userFeedback', 'Positive feedback received.')
+            system_logs = data.get('systemLogs', 'No anomalies detected in logs.')
 
-#     # Push all updates to DynamoDB at once
-#     try:
-#         # Note: update_attrs already contains incidentId, status, updateTime, and all agent outputs
-#         push_incident_to_dynamodb(incident_id, update_attrs, update_attrs.get('status'), TABLE_NAME)
-#         log(f"Incident {incident_id} updated with status {update_attrs.get('status')} in DynamoDB")
-#     except Exception as e:
-#         log(f"Error while pushing incident data to DynamoDB: {str(e)}")
+            closure_status = validate_closure(user_feedback, system_logs)
+            results['closure'] = closure_status
+            update_attrs['closure'] = closure_status
+            update_attrs['status'] = "CLOSURE"
+            update_attrs['updateTime'] = datetime.utcnow().isoformat()
+        else:
+            results['closure'] = item.get('closure') if item else ''
+    except Exception as e:
+        results['closure'] = f"Closure validation failed: {str(e)}"
 
-#     return jsonify(results)
+    # POSTMORTEM agent
+    try:
+        if start_index <= 5:
+            log("Running Post-Mortem Agent")
+            postmortem = generate_postmortem(incident_desc, results.get('diagnosis', ''), results.get('resolution', ''), escalation)
+            results['postmortem'] = postmortem
+            update_attrs['postmortem'] = postmortem
+            update_attrs['status'] = "POSTMORTEM"
+            update_attrs['updateTime'] = datetime.utcnow().isoformat()
+        else:
+            results['postmortem'] = item.get('postmortem') if item else ''
+    except Exception as e:
+        results['postmortem'] = f"Post-Mortem Generation failed: {str(e)}"
+
+
+    # Push all updates to DynamoDB at once
+    try:
+        # Note: update_attrs already contains incidentId, status, updateTime, and all agent outputs
+        update_incident_in_dynamodb(incident_id, update_attrs, LATEST_TABLE_NAME)
+        log(f"Incident {incident_id} updated with status {update_attrs.get('status')} in DynamoDB")
+    except Exception as e:
+        log(f"Error while pushing incident data to DynamoDB: {str(e)}")
+
+    return jsonify(results)
 
 @app.route('/check_incident', methods=['POST'])
 def check_incident():

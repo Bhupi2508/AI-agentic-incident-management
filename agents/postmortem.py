@@ -8,13 +8,14 @@ load_dotenv()
 BEDROCK_REGION = os.environ["BEDROCK_REGION"]
 MODEL_ID = os.environ["BEDROCK_MODEL_ID"]
 
-def generate_postmortem(incident, diagnosis, resolution):
+def generate_postmortem(incident, diagnosis, resolution, escalation):
     try:
         bedrock = boto3.client("bedrock-runtime", region_name=BEDROCK_REGION)
 
         prompt = (
             f"Incident: {incident}\n"
             f"Diagnosis: {diagnosis}\n"
+            f"Escalation: {escalation}\n\n"
             f"Resolution: {resolution}\n\n"
             "Give a short 5-line summary for:\n"
             "1. Root cause\n"

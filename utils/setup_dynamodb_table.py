@@ -66,7 +66,7 @@ def add_incident_entry(
     }
 
     if status is None or status.upper() not in allowed_statuses:
-        print(f"❌ Invalid or missing status '{status}'. Allowed statuses are: {allowed_statuses}")
+        print(f"Invalid or missing status '{status}'. Allowed statuses are: {allowed_statuses}")
         return
 
     print(f"Using AWS Region: {AWS_DEFAULT_REGION}")
@@ -109,12 +109,12 @@ def add_incident_entry(
             Item=item,
             ConditionExpression='attribute_not_exists(incidentId)'
         )
-        print(f"✅ Incident '{incidentId}' added successfully.")
+        print(f"Incident '{incidentId}' added successfully.")
     except ClientError as e:
         if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
-            print(f"❌ Incident with ID '{incidentId}' already exists!")
+            print(f"Incident with ID '{incidentId}' already exists!")
         else:
-            print(f"❌ Error adding incident: {e.response['Error']['Message']}")
+            print(f"Error adding incident: {e.response['Error']['Message']}")
 
 if __name__ == "__main__":
     add_incident_entry(
