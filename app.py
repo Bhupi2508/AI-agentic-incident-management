@@ -77,8 +77,7 @@ def run_agents():
         if start_index <= 0:
             log("************ Running Diagnosis Agent ************")
             diagnosis = diagnose_with_bedrock(incident_desc)
-            print("++++++ diagnosis final response :::::::: ", diagnosis)
-            results['diagnosis'] = diagnosis
+            results['diagnosis'] = diagnosis['diagnosis']
             update_attrs['diagnosis'] = diagnosis
             update_attrs['status'] = "DIAGNOSIS"
             update_attrs['updateTime'] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
@@ -121,7 +120,7 @@ def run_agents():
     try:
         if start_index <= 3:
             log("************ Running Communication Agent ************")
-            send_test_email(incident_desc, escalation, results.get('resolution', ''), EMAIL_RECIPIENT)
+            # send_test_email(incident_desc, escalation, results.get('resolution', ''), EMAIL_RECIPIENT)
             results['communication'] = "Email sent successfully."
             update_attrs['communication'] = results['communication']
             update_attrs['status'] = "COMMUNICATION"
@@ -169,11 +168,15 @@ def run_agents():
     # Push all updates to DynamoDB at once
     try:
         # Note: update_attrs already contains incidentId, status, updateTime, and all agent outputs
-        update_incident_in_dynamodb(incident_id, update_attrs, LATEST_TABLE_NAME)
+        update_attrs['description'] = incident_desc
+        data = update_incident_in_dynamodb(incident_id, update_attrs, LATEST_TABLE_NAME)
         log(f"Incident {incident_id} updated with status {update_attrs.get('status')} in DynamoDB")
     except Exception as e:
         log(f"Error while pushing incident data to DynamoDB: {str(e)}")
 
+    results['diagnosis'] = str(results['diagnosis'])
+    results['escalation'] = str(results['escalation'])
+    # results["status"] = ""
     return jsonify(results)
 
 @app.route('/check_incident', methods=['POST'])
