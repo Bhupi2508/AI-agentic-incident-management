@@ -3,58 +3,78 @@
 |      System        |
 +---------+----------+
           |
-          | Incident Reported (Incident Description)
+          | Incident Reported or Incident ID Provided
           ▼
-+---------------------------+
-|  Incident Diagnosis API   | <----- AWS Bedrock (Anthropic Claude 3)
-|  (Python Backend Service) |
-|                           |
-| - Receives incident       |
-| - Calls AI model to       |
-|   analyze & diagnose      |
-| - Calculates confidence   |
-|   score & severity        |
-| - Decides if human        |
-|   intervention needed     |
-+------------+--------------+
-             |
-             | Diagnosis + Severity + Confidence Score
-             ▼
-+-----------------------------+
-| Severity & Escalation Logic |  <-- External JSON rules (severity_rules.json)
-+-------------+---------------+
-              |
-              | If severity high or confidence low
-              ▼
-+-----------------------------+
-| Human Intervention Workflow | <-- Trigger alert to human / Support team
-+-----------------------------+
-              |
-              ▼
-+-----------------------------+
-| Automated Resolution Suggestion | <-- Based on AI Next Steps output
-+-----------------------------+
-              |
-              ▼
-+-------------------------+
-| Notification Service    | <-- Email / Slack / PagerDuty integration
-+-------------------------+
-              |
-              ▼
-+------------------------+
-| Database (AWS DynamoDB) |  <-- Stores incidents, diagnosis results, status, logs
-+------------------------+
-              |
-              ▼
-+------------------------------+
-| Closure Validation & Feedback | <-- User feedback + system logs for confirmation
-+------------------------------+
-              |
-              | Yes
-              ▼
-+---------------------------+
-| Postmortem Summary Report |
-+---------------------------+
-              |
-              ▼
-       [Cycle repeats for new incidents or re-escalation]
++------------------------------------+
+| Check if Incident ID exists in DB  |
++----------------+-------------------+
+                 | Yes                            | No
+                 ▼                                ▼
++----------------------------+     +-----------------------------+
+| Show Postmortem Report     |     | Show Incident Description    |
+| (Hide input fields)        |     | Input for new incident       |
++-------------+--------------+     +-------------+---------------+
+              |                                    |
+              ▼                                    ▼
+        [End User View]                  Incident Diagnosis API
+                                           (Call AI Model, etc.)
+                                                  |
+                                                  ▼
+                                     +---------------------------+
+                                     | AI Model + Severity Logic |
+                                     +------------+--------------+
+                                                  |
+                                                  ▼
+                                   +---------------------------+
+                                   |  Incident Diagnosis API   | <----- AWS Bedrock (Anthropic Claude 3)
+                                   |  (Python Backend Service) |
+                                   |                           |
+                                   | - Receives incident       |
+                                   | - Calls AI model to       |
+                                   |   analyze & diagnose      |
+                                   | - Calculates confidence   |
+                                   |   score & severity        |
+                                   | - Decides if human        |
+                                   |   intervention needed     |
+                                   +------------+--------------+
+                                          |
+                                          | Diagnosis + Severity + Confidence Score
+                                          ▼
+                                   +-----------------------------+
+                                   | Severity & Escalation Logic |  <-- External JSON rules (severity_rules.json)
+                                   +-------------+---------------+
+                                                 |
+                                                 | If severity high or confidence low
+                                                 ▼
+                                   +-----------------------------+
+                                   | Human Intervention Workflow | <-- Trigger alert to human / Support team
+                                   +-----------------------------+
+                                                 |
+                                                 ▼
+                                   +-----------------------------+
+                                   | Automated Resolution Suggestion | <-- Based on AI Next Steps output
+                                   +-----------------------------+
+                                                 |
+                                                 ▼
+                                   +-------------------------+
+                                   | Notification Service    | <-- Email / Slack / PagerDuty integration
+                                   +-------------------------+
+                                                 |
+                                                 ▼
+                                   +------------------------+
+                                   | Database (AWS DynamoDB) |  <-- Stores incidents, diagnosis results, status, logs
+                                   +------------------------+
+                                                 |
+                                                 ▼
+                                   +------------------------------+
+                                   | Closure Validation & Feedback | <-- User feedback + system logs for confirmation
+                                   +------------------------------+
+                                                 |
+                                                 | Yes
+                                                 ▼
+                                   +---------------------------+
+                                   | Postmortem Summary Report |
+                                   +---------------------------+
+                                                 |
+                                                 ▼
+                                          [Cycle repeats for new incidents or re-escalation]
