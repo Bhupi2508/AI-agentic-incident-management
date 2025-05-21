@@ -136,6 +136,6 @@ def calculate_confidence(output_text):
 # Returns True if human intervention is required, else False.
 def needs_human_intervention(confidence_score, severity):
     high_severity_levels = ["high", "blocker", "critical"]  # include all high-severity terms
-    if confidence_score < 0.5 or severity.lower() in high_severity_levels:
+    if confidence_score < 0.6 or severity.lower() in high_severity_levels:
         return True
     return False

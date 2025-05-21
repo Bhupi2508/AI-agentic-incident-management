@@ -1,24 +1,60 @@
-User / Monitoring System
-       │
-       ▼
-Incident Reported ──> Severity & Escalation Decision
-       │                      │
-       │                      ▼
-       │             Automated Resolution Suggestion
-       │                      │
-       │                      ▼
-       │             Send Notification (Email / Slack)
-       │                      │
-       ▼                      ▼
-Closure Validation <─ User Feedback + System Logs
-       │
-       ▼
-Is closure validated?
-   ├─ Yes ──> Generate Postmortem Summary
-   └─ No ──> Further Investigation or Manual Intervention
-       │
-       ▼
-Data Stored & Monitored in DB
-       │
-       ▼
-Cycle repeats as needed for updates or re-escalation
++--------------------+
+|  User / Monitoring  |
+|      System        |
++---------+----------+
+          |
+          | Incident Reported (Incident Description)
+          ▼
++---------------------------+
+|  Incident Diagnosis API   | <----- AWS Bedrock (Anthropic Claude 3)
+|  (Python Backend Service) |
+|                           |
+| - Receives incident       |
+| - Calls AI model to       |
+|   analyze & diagnose      |
+| - Calculates confidence   |
+|   score & severity        |
+| - Decides if human        |
+|   intervention needed     |
++------------+--------------+
+             |
+             | Diagnosis + Severity + Confidence Score
+             ▼
++-----------------------------+
+| Severity & Escalation Logic |  <-- External JSON rules (severity_rules.json)
++-------------+---------------+
+              |
+              | If severity high or confidence low
+              ▼
++-----------------------------+
+| Human Intervention Workflow | <-- Trigger alert to human / Support team
++-----------------------------+
+              |
+              ▼
++-----------------------------+
+| Automated Resolution Suggestion | <-- Based on AI Next Steps output
++-----------------------------+
+              |
+              ▼
++-------------------------+
+| Notification Service    | <-- Email / Slack / PagerDuty integration
++-------------------------+
+              |
+              ▼
++------------------------+
+| Database (AWS DynamoDB) |  <-- Stores incidents, diagnosis results, status, logs
++------------------------+
+              |
+              ▼
++------------------------------+
+| Closure Validation & Feedback | <-- User feedback + system logs for confirmation
++------------------------------+
+              |
+              | Yes
+              ▼
++---------------------------+
+| Postmortem Summary Report |
++---------------------------+
+              |
+              ▼
+       [Cycle repeats for new incidents or re-escalation]
