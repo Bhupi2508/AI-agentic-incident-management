@@ -174,24 +174,23 @@ def lambda_handler(event, context):
         result = invoke_lambda("dynamoDBAgent", event)
         log(f"DB Result :: {result} ")
         # invoke_lambda(os.getenv("dynamoDBAgent"), update_attrs)
-
+        log(f"Final Results =>>>>> {results}")
         log("Handler finished successfully") 
         return {
         "statusCode": 200,
         "body": {
-            "incidentId": results.get("incidentId"),
-            "status": results.get("status"),
-            "description": results.get("description"),
+            "incidentId": event.get("incidentId", ""),
+            "status": update_attrs.get("status"),
+            "description": update_attrs.get("description"),
             "diagnosis": results.get("diagnosis"),
-            "severity": results.get("severity"),
-            "needs_human_intervention": results.get("needs_human_intervention"),
-            "confidence_score": results.get("confidence_score"),
+            "calculate_human_intervention": update_attrs.get("needs_human_intervention"),
             "escalation": results.get("escalation"),
             "resolution": results.get("resolution"),
             "communication": results.get("communication"),
             "closure": results.get("closure"),
             "postmortem": results.get("postmortem"),
-            "updated_at": results.get("updated_at")
+            "updated_at": update_attrs.get("updated_at"),
+            "calculate_severity": results.get("severity")
         }
     }
 
